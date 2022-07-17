@@ -1,114 +1,110 @@
-import { Application, Router, Context } from 'https://deno.land/x/oak/mod.ts' // TODO: version
-import { path, z } from './mod.ts'
-import { vars } from './util/vars.ts'
-import * as util from './util/util.ts'
-import * as documentUtils from './util/documentUtils.ts'
-import * as sendUtils from './util/sendUtils.ts'
+import { path, z, Application, Router, Context } from "./mod.ts";
+import { vars } from "./util/vars.ts";
+import * as util from "./util/util.ts";
+import * as documentUtils from "./util/documentUtils.ts";
+import * as sendUtils from "./util/sendUtils.ts";
+import * as schema from "../../schema/src/index.ts";
 
-export const router = new Router()
+export const router = new Router();
 
-router.post('/api/meta', (ctx) => {
-	return sendUtils.json(ctx, vars)
-})
+router.post("/api/meta", (ctx) => {
+	return sendUtils.json(ctx, vars);
+});
 
-router.post('/api/document/create', async (ctx) => {
-	const schema = z.object({
-		name: z.string().min(1),
-	})
-	const schemaResult = await util.extractData<typeof schema>(ctx, schema)
-	if (!schemaResult.success) {
-		return sendUtils.error(ctx, schemaResult.data)
-	}
-	const { name } = schemaResult.data
+/* ---------------------- document ---------------------- */
 
-	const apiResult = await documentUtils.documentCreate(name)
+// documentCreate
+router.post("/api/document/create", async (ctx) => {
+	const data = await util.extractRequest<schema.documentCreateReqType>(
+		ctx,
+		schema.documentCreateReq
+	);
+	if (!data) return;
+
+	const apiResult = await documentUtils.documentCreate(data.name);
 	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data)
+		return sendUtils.error(ctx, apiResult.data);
 	}
 
-	return sendUtils.success(ctx)
-})
+	return sendUtils.success(ctx);
+});
 
-router.post('/api/document/read', async (ctx) => {
-	const schema = z.object({
-		name: z.string().min(1),
-	})
-	const schemaResult = await util.extractData<typeof schema>(ctx, schema)
-	if (!schemaResult.success) {
-		return sendUtils.error(ctx, schemaResult.data)
-	}
+// documentRead
+router.post("/api/document/read", async (ctx) => {
+	const data = await util.extractRequest<schema.documentReadReqType>(
+		ctx,
+		schema.documentCreateReq
+	);
+	if (!data) return;
 
-	const { name } = schemaResult.data
-
-	const apiResult = await documentUtils.documentRead(name)
+	const apiResult = await documentUtils.documentRead(data.name);
 	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data)
+		return sendUtils.error(ctx, apiResult.data);
 	}
 
 	return sendUtils.json(ctx, {
 		content: apiResult.data,
-	})
-})
+	});
+});
 
-router.post('/api/document/write', async (ctx) => {
-	const schema = z.object({
-		name: z.string().min(1),
-		content: z.string(),
-	})
-	const schemaResult = await util.extractData<typeof schema>(ctx, schema)
-	if (!schemaResult.success) {
-		return sendUtils.error(ctx, schemaResult.data)
+// documentWrite
+router.post("/api/document/write", async (ctx) => {
+	const data = await util.extractRequest<schema.documentWriteReqType>(
+		ctx,
+		schema.documentWriteReq
+	);
+	if (!data) return;
+
+	const apiResult = await documentUtils.documentWrite(data.name, data.content);
+	if (!apiResult.success) {
+		return sendUtils.error(ctx, apiResult.data);
 	}
 
-	const { name, content } = schemaResult.data
+	return sendUtils.success(ctx);
+});
 
-	const apiResult = await documentUtils.documentWrite(name, content)
+// documentList
+router.post("/api/document/list", async (ctx) => {
+	const data = await util.extractRequest<schema.documentListReqType>(
+		ctx,
+		schema.documentListReq
+	);
+	if (!data) return;
+
+	const apiResult = await documentUtils.documentList();
 	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data)
-	}
-
-	return sendUtils.success(ctx)
-})
-
-router.post('/api/document/list', async (ctx) => {
-	const apiResult = await documentUtils.documentList()
-	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data)
+		return sendUtils.error(ctx, apiResult.data);
 	}
 
 	return sendUtils.json(ctx, {
 		documents: apiResult.data,
-	})
-})
+	});
+});
 
-// UniqueDocuments
+/* ------------------- uniqueDocument ------------------- */
 
-router.post('/api/uniqueDocument/read', async (ctx) => {
-	const schema = z.object({
-		context: z.string().min(1),
-		id: z.string().min(1),
-	})
-	const schemaResult = await util.extractData<typeof schema>(ctx, schema)
-	if (!schemaResult.success) {
-		return sendUtils.error(ctx, schemaResult.data)
-	}
-	const { context, id } = schemaResult.data
+router.post("/api/uniqueDocument/read", async (ctx) => {
+	const data = await util.extractRequest<schema.uniqueDocumentReadReqType>(
+		ctx,
+		schema.uniqueDocumentReadReq
+	);
+	if (!data) return;
 
-	const readResult = await documentUtils.uniqueDocumentRead(context, id)
-})
+	const readResult = await documentUtils.uniqueDocumentRead(
+		data.context,
+		data.id
+	);
+});
 
-router.post('/api/uniqueDocument/list', async (ctx) => {
-	const schema = z.object({
-		context: z.string().min(1),
-	})
-	const schemaResult = await util.extractData<typeof schema>(ctx, schema)
-	if (!schemaResult.success) {
-		return sendUtils.error(ctx, schemaResult.data)
-	}
-	const { context } = schemaResult.data
+router.post("/api/uniqueDocument/list", async (ctx) => {
+	const data = await util.extractRequest<schema.uniqueDocumentListReqType>(
+		ctx,
+		schema.uniqueDocumentListReq
+	);
+	if (!data) return;
 
-	const arr = await documentUtils.uniqueDocumentList(context)
+	const arr = await documentUtils.uniqueDocumentList(data.context);
 	return sendUtils.json(ctx, {
 		documents: arr,
-	})
-})
+	});
+});
