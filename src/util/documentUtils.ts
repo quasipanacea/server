@@ -1,4 +1,4 @@
-import { path, fs, z } from "../mod.ts";
+import { path, z } from "../mod.ts";
 import * as util from "./util.ts";
 import { vars } from "./vars.ts";
 import { KnowledgeError } from "./KnowledgeError.ts";
@@ -60,6 +60,22 @@ export async function documentWrite(
 	const file = await util.getFileFromName(name);
 	try {
 		await Deno.writeTextFile(file, content);
+		return resultTrue(null);
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) {
+			return resultFalse(new KnowledgeError("Unknown error"));
+		}
+
+		return resultFalse(new KnowledgeError("Unaccounted error"));
+	}
+}
+
+export async function documentDelete(
+	name: string
+): Result<null, KnowledgeError> {
+	const file = await util.getFileFromName(name);
+	try {
+		await Deno.remove(file);
 		return resultTrue(null);
 	} catch (err: unknown) {
 		if (!(err instanceof Error)) {

@@ -1,4 +1,4 @@
-import { path, z, Application, Router, Context } from "./mod.ts";
+import { Router } from "./mod.ts";
 import { vars } from "./util/vars.ts";
 import * as util from "./util/util.ts";
 import * as documentUtils from "./util/documentUtils.ts";
@@ -56,6 +56,22 @@ router.post("/api/document/write", async (ctx) => {
 	if (!data) return;
 
 	const apiResult = await documentUtils.documentWrite(data.name, data.content);
+	if (!apiResult.success) {
+		return sendUtils.error(ctx, apiResult.data);
+	}
+
+	return sendUtils.success(ctx);
+});
+
+// documentDelete
+router.post("/api/document/delete", async (ctx) => {
+	const data = await util.extractRequest<schema.documentDeleteReqType>(
+		ctx,
+		schema.documentDeleteReq
+	);
+	if (!data) return;
+
+	const apiResult = await documentUtils.documentDelete(data.name);
 	if (!apiResult.success) {
 		return sendUtils.error(ctx, apiResult.data);
 	}
