@@ -3,9 +3,14 @@ import { vars } from "./util/vars.ts";
 import * as util from "./util/util.ts";
 import * as documentUtils from "./util/documentUtils.ts";
 import * as sendUtils from "./util/sendUtils.ts";
-import * as schema from "../../schema/src/index.ts";
+import * as schema from "../common/schema.ts";
 
 export const router = new Router();
+
+router.use("/", async ({ request: req }, next) => {
+	console.log(`${req.method} ${req.url.pathname}`);
+	await next();
+});
 
 router.post("/api/meta", (ctx) => {
 	return sendUtils.json(ctx, vars);
@@ -94,33 +99,5 @@ router.post("/api/document/list", async (ctx) => {
 
 	return sendUtils.json(ctx, {
 		documents: apiResult.data,
-	});
-});
-
-/* ------------------- uniqueDocument ------------------- */
-
-router.post("/api/uniqueDocument/read", async (ctx) => {
-	const data = await util.extractRequest<schema.uniqueDocumentReadReqType>(
-		ctx,
-		schema.uniqueDocumentReadReq
-	);
-	if (!data) return;
-
-	const readResult = await documentUtils.uniqueDocumentRead(
-		data.context,
-		data.id
-	);
-});
-
-router.post("/api/uniqueDocument/list", async (ctx) => {
-	const data = await util.extractRequest<schema.uniqueDocumentListReqType>(
-		ctx,
-		schema.uniqueDocumentListReq
-	);
-	if (!data) return;
-
-	const arr = await documentUtils.uniqueDocumentList(data.context);
-	return sendUtils.json(ctx, {
-		documents: arr,
 	});
 });
