@@ -3,6 +3,7 @@ import { Context, Status } from "../mod.ts";
 export function error(ctx: Context, error: any) {
 	ctx.response.status = 500;
 	ctx.response.headers.set("Content-Type", "application/json");
+
 	if (error?.error) {
 		ctx.response.body = JSON.stringify(error.error, null, "\t");
 	} else {

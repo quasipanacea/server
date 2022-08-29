@@ -1,103 +1,156 @@
 import { Router } from "./mod.ts";
-import { vars } from "./util/vars.ts";
+import * as api from "./util/serverApi.ts";
+import * as send from "./util/send.ts";
+import * as extract from "./util/extract.ts";
 import * as util from "./util/util.ts";
-import * as documentUtils from "./util/documentUtils.ts";
-import * as sendUtils from "./util/sendUtils.ts";
-import * as schema from "../common/schema.ts";
 
 export const router = new Router();
 
-router.use("/", async ({ request: req }, next) => {
-	console.log(`${req.method} ${req.url.pathname}`);
-	await next();
-});
-
-router.post("/api/meta", (ctx) => {
-	return sendUtils.json(ctx, vars);
-});
-
 /* ---------------------- document ---------------------- */
 
-// documentCreate
 router.post("/api/document/create", async (ctx) => {
-	const data = await util.extractRequest<schema.documentCreateReqType>(
-		ctx,
-		schema.documentCreateReq
-	);
-	if (!data) return;
+	await util.onKind(ctx, {
+		single: async () => {
+			const data = await extract.documentCreateSingle(ctx);
+			if (!data) return;
 
-	const apiResult = await documentUtils.documentCreate(data.name);
-	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data);
-	}
+			const result = await api.documentCreateSingle(data.name);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
 
-	return sendUtils.success(ctx);
-});
+			return send.success(ctx);
+		},
+		couple: async () => {
+			const data = await extract.documentCreateCoupled(ctx);
+			if (!data) return;
 
-// documentRead
-router.post("/api/document/read", async (ctx) => {
-	const data = await util.extractRequest<schema.documentReadReqType>(
-		ctx,
-		schema.documentCreateReq
-	);
-	if (!data) return;
+			const result = await api.documentCreateCouple(data.channel, data.id);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
 
-	const apiResult = await documentUtils.documentRead(data.name);
-	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data);
-	}
-
-	return sendUtils.json(ctx, {
-		content: apiResult.data,
+			return send.success(ctx);
+		},
 	});
 });
 
-// documentWrite
+router.post("/api/document/read", async (ctx) => {
+	await util.onKind(ctx, {
+		single: async () => {
+			const data = await extract.documentReadSingle(ctx);
+			if (!data) return;
+
+			const result = await api.documentReadSingle(data.name);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.json(ctx, {
+				content: result.data,
+			});
+		},
+		couple: async () => {
+			const data = await extract.documentReadCouple(ctx);
+			if (!data) return;
+
+			const result = await api.documentReadCouple(data.channel, data.id);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.json(ctx, {
+				content: result.data,
+			});
+		},
+	});
+});
+
 router.post("/api/document/write", async (ctx) => {
-	const data = await util.extractRequest<schema.documentWriteReqType>(
-		ctx,
-		schema.documentWriteReq
-	);
-	if (!data) return;
+	await util.onKind(ctx, {
+		single: async () => {
+			const data = await extract.documentWriteSingle(ctx);
+			if (!data) return;
 
-	const apiResult = await documentUtils.documentWrite(data.name, data.content);
-	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data);
-	}
+			const result = await api.documentWriteSingle(data.name, data.content);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
 
-	return sendUtils.success(ctx);
+			return send.success(ctx);
+		},
+		couple: async () => {
+			const data = await extract.documentWriteCouple(ctx);
+			if (!data) return;
+
+			const result = await api.documentWriteCouple(
+				data.channel,
+				data.id,
+				data.content
+			);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.success(ctx);
+		},
+	});
 });
 
-// documentDelete
 router.post("/api/document/delete", async (ctx) => {
-	const data = await util.extractRequest<schema.documentDeleteReqType>(
-		ctx,
-		schema.documentDeleteReq
-	);
-	if (!data) return;
+	await util.onKind(ctx, {
+		single: async () => {
+			const data = await extract.documentDeleteSingle(ctx);
+			if (!data) return;
 
-	const apiResult = await documentUtils.documentDelete(data.name);
-	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data);
-	}
+			const result = await api.documentDeleteSingle(data.name);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
 
-	return sendUtils.success(ctx);
+			return send.success(ctx);
+		},
+		couple: async () => {
+			const data = await extract.documentDeleteCouple(ctx);
+			if (!data) return;
+
+			const result = await api.documentDeleteCouple(data.channel, data.id);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.success(ctx);
+		},
+	});
 });
 
-// documentList
 router.post("/api/document/list", async (ctx) => {
-	const data = await util.extractRequest<schema.documentListReqType>(
-		ctx,
-		schema.documentListReq
-	);
-	if (!data) return;
+	await util.onKind(ctx, {
+		single: async () => {
+			const data = await extract.documentListSingle(ctx);
+			if (!data) return;
 
-	const apiResult = await documentUtils.documentList();
-	if (!apiResult.success) {
-		return sendUtils.error(ctx, apiResult.data);
-	}
+			const result = await api.documentListSingle();
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
 
-	return sendUtils.json(ctx, {
-		documents: apiResult.data,
+			return send.json(ctx, {
+				documents: result.data,
+			});
+		},
+		couple: async () => {
+			const data = await extract.documentListCouple(ctx);
+			if (!data) return;
+
+			const result = await api.documentListCouple(data.channel);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.json(ctx, {
+				documents: result.data,
+			});
+		},
 	});
 });

@@ -1,6 +1,8 @@
-import { path, z, Context, fs } from "../mod.ts";
-import { vars } from "./vars.ts";
-import * as sendUtils from "./sendUtils.ts";
+import { path, z, Context, fs, helpers } from "../mod.ts";
+import { config } from "../config.ts";
+import * as send from "./send.ts";
+import * as schema from "../../common/schema.ts";
+import { Status } from "https://deno.land/std@0.152.0/http/http_status.ts";
 
 export async function recursiveReaddir(filePath: string) {
 	const files: string[] = [];
@@ -21,47 +23,31 @@ export async function exists(filePath: string) {
 	return await fs.exists(filePath);
 }
 
-// For documents
-export function getDocumentsDir() {}
-
-export function getFileFromName(name: string) {
-	return path.join(vars.documentsDir, `${name}.md`);
-}
-export function idTofilename(id: string) {
-	return `${id}.txt`;
+export function toSingleDir() {
+	return path.join(config.documentsDir, "single");
 }
 
-export function pathFromId(id: string) {
-	return path.join(vars.documentsDir, `${id}.txt`);
+export function toCoupleDir(channel: string) {
+	return path.join(config.documentsDir, "coupled", channel);
 }
 
-export function handleError(error: unknown) {
-	if (!(error instanceof Error)) {
-		return new Error("Unknown error");
-	}
-
-	return error;
-}
-// For unique documents
-export function getFileFromId(app: string, id: string) {
-	return path.join(vars.documentsDir, "__uniques", app, `${id}.md`);
+export function toFilename(name: string) {
+	return `${name}.md`;
 }
 
 export function filenameToName(filename: string) {
 	return filename.slice(0, filename.indexOf("."));
 }
 
-export async function extractData<T>(
-	ctx: Context,
+export function extractData<T>(
+	body: string,
 	schema: z.AnyZodObject
-): Promise<
+):
 	| {
 			success: false;
 			data: { error: string | z.inferFormattedError<typeof schema> };
 	  }
-	| { success: true; data: T }
-> {
-	const body = await ctx.request.body({ type: "text" }).value;
+	| { success: true; data: T } {
 	try {
 		const json = JSON.parse(body);
 		const result = schema.safeParse(json);
@@ -81,11 +67,39 @@ export async function extractRequest<T>(
 	ctx: Context,
 	schema: z.AnyZodObject
 ): Promise<T | null> {
-	const schemaResult = await extractData<T>(ctx, schema);
+	const body = await ctx.request.body({ type: "text" }).value;
+	const schemaResult = await extractData<T>(body, schema);
 	if (!schemaResult.success) {
-		sendUtils.error(ctx, schemaResult.data);
+		send.error(ctx, schemaResult.data);
 		return null;
 	}
 
 	return schemaResult.data;
+}
+
+export async function onKind(
+	ctx: Context,
+	{
+		single: singleFn,
+		couple: coupleFn,
+	}: { single: () => void; couple: () => void }
+) {
+	const kind = ctx.request.url.searchParams.get("kind");
+	if (!kind) {
+		ctx.response.body = { error: "Missing query parameter: kind" };
+		ctx.response.status = Status.NotAcceptable;
+		return;
+	}
+	switch (kind) {
+		case schema.documentKinds.enum.KindSingle:
+			await singleFn();
+			break;
+		case schema.documentKinds.enum.KindCoupled:
+			await coupleFn();
+			break;
+		default:
+			ctx.response.body = { error: `Invalid query parameter: ${kind}` };
+			ctx.response.status = Status.NotAcceptable;
+			break;
+	}
 }
