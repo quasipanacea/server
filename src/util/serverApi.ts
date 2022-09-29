@@ -1,4 +1,4 @@
-import { path, z } from "../mod.ts";
+import { fs, path, z } from "../mod.ts";
 import * as util from "./util.ts";
 import { log } from "./logger.ts";
 import * as error from "../error.ts";
@@ -259,4 +259,43 @@ export async function documentListCouple(
 
 		return resultFalse(err);
 	}
+}
+
+// query single
+export async function documentQuerySingle(
+	name: string,
+	query: string
+): Result<string, Error> {
+	const dir = util.toSingleDir();
+	const file = path.join(dir, util.toFilename(name));
+
+	if (query === "does-exist") {
+		if (await fs.exists(file)) {
+			return resultTrue("yes");
+		} else {
+			return resultTrue("no");
+		}
+	}
+
+	return resultFalse(new Error("query is not of the allowed variant"));
+}
+
+// query couple
+export async function documentQueryCouple(
+	channel: string,
+	id: string,
+	query: string
+): Result<string, Error> {
+	const dir = util.toCoupleDir(channel);
+	const file = path.join(dir, util.toFilename(id));
+
+	if (query === "does-exist") {
+		if (await fs.exists(file)) {
+			return resultTrue("yes");
+		} else {
+			return resultTrue("no");
+		}
+	}
+
+	return resultFalse(new Error("query is not of the allowed variant"));
 }

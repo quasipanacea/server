@@ -154,3 +154,38 @@ router.post("/api/document/list", async (ctx) => {
 		},
 	});
 });
+
+router.post("/api/document/query", async (ctx) => {
+	await util.onKind(ctx, {
+		single: async () => {
+			const data = await extract.documentQuerySingle(ctx);
+			if (!data) return;
+
+			const result = await api.documentQuerySingle(data.name, data.query);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.json(ctx, {
+				value: result.data,
+			});
+		},
+		couple: async () => {
+			const data = await extract.documentQueryCouple(ctx);
+			if (!data) return;
+
+			const result = await api.documentQueryCouple(
+				data.channel,
+				data.id,
+				data.query
+			);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.json(ctx, {
+				value: result.data,
+			});
+		},
+	});
+});

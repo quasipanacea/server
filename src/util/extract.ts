@@ -71,3 +71,17 @@ export function documentListCouple(ctx: Context) {
 		schema.documentListCoupleRequest
 	);
 }
+
+export function documentQuerySingle(ctx: Context) {
+	return util.extractRequest<schema.documentQuerySingleRequestType>(
+		ctx,
+		schema.documentQuerySingleRequest
+	);
+}
+
+export function documentQueryCouple(ctx: Context) {
+	return util.extractRequest<schema.documentQueryCoupleRequestType>(
+		ctx,
+		schema.documentQueryCoupleRequest
+	)
+}
