@@ -162,6 +162,67 @@ export async function documentWriteCouple(
 	}
 }
 
+// rename single
+export async function documentRenameSingle(
+	oldName: string,
+	newName: string
+): Result<null, Error> {
+	const dir = util.toSingleDir();
+	const oldFile = path.join(dir, util.toFilename(oldName));
+	const newFile = path.join(dir, util.toFilename(newName));
+
+	if (await fs.exists(newFile)) {
+		return resultFalse(new error.DocumentAlreadyExistsError(newFile));
+	}
+
+	try {
+		await Deno.rename(oldFile, newFile);
+
+		return resultTrue(null);
+	} catch (err) {
+		if (!(err instanceof Error)) {
+			return resultFalse(new error.UnknownError(err));
+		}
+
+		if (err instanceof Deno.errors.AlreadyExists) {
+			return resultFalse(new error.DocumentAlreadyExistsError(newFile));
+		}
+
+		return resultFalse(err);
+	}
+}
+
+// rename couple
+export async function documentRenameCouple(
+	channel: string,
+	oldId: string,
+	newId: string
+): Result<null, Error> {
+	const dir = util.toCoupleDir(channel);
+	const oldFile = path.join(dir, util.toFilename(oldId));
+	const newFile = path.join(dir, util.toFilename(newId));
+
+	if (await fs.exists(newFile)) {
+		return resultFalse(new error.DocumentAlreadyExistsError(newFile));
+	}
+
+	try {
+		await Deno.rename(oldFile, newFile);
+
+		return resultTrue(null);
+	} catch (err) {
+		if (!(err instanceof Error)) {
+			return resultFalse(new error.UnknownError(err));
+		}
+
+		if (err instanceof Deno.errors.AlreadyExists) {
+			return resultFalse(new error.DocumentAlreadyExistsError(newFile));
+		}
+
+		return resultFalse(err);
+	}
+}
+
 // delete single
 export async function documentDeleteSingle(name: string): Result<null, Error> {
 	const dir = util.toSingleDir();

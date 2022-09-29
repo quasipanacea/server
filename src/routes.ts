@@ -97,6 +97,37 @@ router.post("/api/document/write", async (ctx) => {
 	});
 });
 
+router.post("/api/document/rename", async (ctx) => {
+	await util.onKind(ctx, {
+		single: async () => {
+			const data = await extract.documentRenameSingle(ctx);
+			if (!data) return;
+
+			const result = await api.documentRenameSingle(data.oldName, data.newName);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.success(ctx);
+		},
+		couple: async () => {
+			const data = await extract.documentRenameCouple(ctx);
+			if (!data) return;
+
+			const result = await api.documentRenameCouple(
+				data.channel,
+				data.oldId,
+				data.newId
+			);
+			if (!result.success) {
+				return send.error(ctx, result.data);
+			}
+
+			return send.success(ctx);
+		},
+	});
+});
+
 router.post("/api/document/delete", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {

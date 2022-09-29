@@ -44,6 +44,20 @@ export function documentWriteCouple(ctx: Context) {
 	);
 }
 
+export function documentRenameSingle(ctx: Context) {
+	return util.extractRequest<schema.documentRenameSingleRequestType>(
+		ctx,
+		schema.documentRenameSingleRequest
+	);
+}
+
+export function documentRenameCouple(ctx: Context) {
+	return util.extractRequest<schema.documentRenameCoupleRequestType>(
+		ctx,
+		schema.documentRenameCoupleRequest
+	);
+}
+
 export function documentDeleteSingle(ctx: Context) {
 	return util.extractRequest<schema.documentDeleteSingleRequestType>(
 		ctx,
@@ -83,5 +97,5 @@ export function documentQueryCouple(ctx: Context) {
 	return util.extractRequest<schema.documentQueryCoupleRequestType>(
 		ctx,
 		schema.documentQueryCoupleRequest
-	)
+	);
 }
