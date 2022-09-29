@@ -3,6 +3,7 @@ import { config } from "../config.ts";
 import * as send from "./send.ts";
 import * as schema from "../../common/schema.ts";
 import { Status } from "https://deno.land/std@0.152.0/http/http_status.ts";
+import { UnknownError } from "../error.ts";
 
 export async function recursiveReaddir(filePath: string) {
 	const files: string[] = [];
@@ -67,14 +68,24 @@ export async function extractRequest<T>(
 	ctx: Context,
 	schema: z.AnyZodObject
 ): Promise<T | null> {
-	const body = await ctx.request.body({ type: "text" }).value;
-	const schemaResult = await extractData<T>(body, schema);
-	if (!schemaResult.success) {
-		send.error(ctx, schemaResult.data);
+	try {
+		const body = await ctx.request.body({ type: "text" }).value;
+		const schemaResult = await extractData<T>(body, schema);
+		if (!schemaResult.success) {
+			send.error(ctx, schemaResult.data);
+			return null;
+		}
+
+		return schemaResult.data;
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) {
+			send.error(ctx, new UnknownError(err));
+			return null;
+		}
+
+		send.error(ctx, err);
 		return null;
 	}
-
-	return schemaResult.data;
 }
 
 export async function onKind(
