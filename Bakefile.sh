@@ -6,14 +6,14 @@ task.dev() {
 }
 
 task.build() {
-	mkdir -p './output'
-	deno bundle --import-map ./import_map.json ./src/server.ts -- './output/bundle.js'
+	mkdir -p './build'
+	deno bundle \
+		--import-map './import_map.json' './src/server.ts' -- './build/bundle.js'
 }
 
-task.release-nightly() {
+task.r6elease-nightly() {
 	task.build
-
-	tar czf './output/build.tar.gz' './output/bundle.js'
+	tar czf './output/build.tar.gz' './build/bundle.js'
 
 	util.publish './output/build.tar.gz'
 }
