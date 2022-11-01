@@ -28,6 +28,10 @@ export function toSingleDir() {
 	return path.join(config.documentsDir, "single");
 }
 
+export function toCoupleDirRaw() {
+	return path.join(config.documentsDir, "coupled");
+}
+
 export function toCoupleDir(channel: string) {
 	return path.join(config.documentsDir, "coupled", channel);
 }

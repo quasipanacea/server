@@ -6,6 +6,57 @@ import * as util from "./util/util.ts";
 
 export const router = new Router();
 
+// GROUP
+router.post("/api/group/list", async (ctx) => {
+	const data = await extract.groupList(ctx);
+	if (!data) return;
+
+	const result = await api.groupList();
+	if (!result.success) {
+		return send.error(ctx, result.data);
+	}
+
+	return send.json(ctx, {
+		groups: result.data,
+	});
+});
+
+router.post("/api/group/create", async (ctx) => {
+	const data = await extract.groupCreate(ctx);
+	if (!data) return;
+
+	const result = await api.groupCreate(data.name);
+	if (!result.success) {
+		return send.error(ctx, result.data);
+	}
+
+	return send.success(ctx);
+});
+
+router.post("/api/group/delete", async (ctx) => {
+	const data = await extract.groupDelete(ctx);
+	if (!data) return;
+
+	const result = await api.groupDelete(data.name);
+	if (!result.success) {
+		return send.error(ctx, result.data);
+	}
+
+	return send.success(ctx);
+});
+
+router.post("/api/group/rename", async (ctx) => {
+	const data = await extract.groupRename(ctx);
+	if (!data) return;
+
+	const result = await api.groupRename(data.oldName, data.newName);
+	if (!result.success) {
+		return send.error(ctx, result.data);
+	}
+
+	return send.success(ctx);
+});
+
 /* ---------------------- document ---------------------- */
 
 router.post("/api/document/create", async (ctx) => {

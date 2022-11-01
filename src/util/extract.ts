@@ -2,6 +2,36 @@ import { Context } from "../mod.ts";
 import * as util from "./util.ts";
 import * as schema from "../../common/schema.ts";
 
+// GROUP
+export function groupList(ctx: Context) {
+	return util.extractRequest<schema.groupListRequestType>(
+		ctx,
+		schema.groupListRequest
+	);
+}
+
+export function groupCreate(ctx: Context) {
+	return util.extractRequest<schema.groupCreateRequestType>(
+		ctx,
+		schema.groupCreateRequest
+	);
+}
+
+export function groupDelete(ctx: Context) {
+	return util.extractRequest<schema.groupDeleteRequestType>(
+		ctx,
+		schema.groupDeleteRequest
+	);
+}
+
+export function groupRename(ctx: Context) {
+	return util.extractRequest<schema.groupRenameRequestType>(
+		ctx,
+		schema.groupRenameRequest
+	);
+}
+
+// DOCUMENT
 export function documentCreateSingle(ctx: Context) {
 	return util.extractRequest<schema.documentCreateSingleRequestType>(
 		ctx,

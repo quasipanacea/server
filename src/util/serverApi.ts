@@ -15,6 +15,81 @@ function resultFalse<T>(data: T): { success: false; data: T } {
 	return { success: false, data };
 }
 
+// GROUP
+export async function groupList(): Result<string[], Error> {
+	try {
+		const dir_raw = util.toCoupleDirRaw();
+
+		const dirs = [];
+		for await (const entry of Deno.readDir(dir_raw)) {
+			dirs.push(entry.name);
+		}
+
+		return resultTrue(dirs);
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) {
+			return resultFalse(new error.UnknownError(err));
+		}
+
+		return resultFalse(err);
+	}
+}
+
+export async function groupCreate(name: string): Result<null, Error> {
+	try {
+		const dir_raw = util.toCoupleDirRaw();
+
+		const dir = path.join(dir_raw, name);
+		await fs.ensureDir(dir);
+
+		return resultTrue(null);
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) {
+			return resultFalse(new error.UnknownError(err));
+		}
+
+		return resultFalse(err);
+	}
+}
+
+export async function groupDelete(name: string): Result<null, Error> {
+	try {
+		const dir_raw = util.toCoupleDirRaw();
+
+		const dir = path.join(dir_raw, name);
+		await Deno.remove(dir, { recursive: true });
+
+		return resultTrue(null);
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) {
+			return resultFalse(new error.UnknownError(err));
+		}
+
+		return resultFalse(err);
+	}
+}
+
+export async function groupRename(
+	oldName: string,
+	newName: string
+): Result<null, Error> {
+	try {
+		const dir_raw = util.toCoupleDirRaw();
+
+		const old_dir = path.join(dir_raw, oldName);
+		const new_dir = path.join(dir_raw, newName);
+		await Deno.rename(old_dir, new_dir);
+
+		return resultTrue(null);
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) {
+			return resultFalse(new error.UnknownError(err));
+		}
+
+		return resultFalse(err);
+	}
+}
+
 /* ---------------------- document ---------------------- */
 
 // create single
