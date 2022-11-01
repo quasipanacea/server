@@ -2,7 +2,6 @@ import { path } from "./mod.ts";
 import { z } from "zod";
 
 const schema = z.object({
-	port: z.number().optional(),
 	documentsDir: z.string().min(1),
 });
 

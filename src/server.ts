@@ -24,6 +24,6 @@ app.use(async (ctx, next) => {
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-const port = config.port || 3000;
+const port = 15_800;
 console.info(`Listening on port ${port}`);
 await app.listen({ port });
