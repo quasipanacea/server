@@ -1,7 +1,7 @@
 import { path, z, Context, fs, helpers } from "../mod.ts";
 import { config } from "../config.ts";
 import * as send from "./send.ts";
-import * as schema from "../../common/schema.ts";
+import * as schema from "../../../common/schema.ts";
 import { Status } from "https://deno.land/std@0.152.0/http/http_status.ts";
 import { UnknownError } from "../error.ts";
 

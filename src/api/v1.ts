@@ -1,13 +1,13 @@
-import { Router } from "./mod.ts";
-import * as api from "./util/serverApi.ts";
-import * as send from "./util/send.ts";
-import * as extract from "./util/extract.ts";
-import * as util from "./util/util.ts";
+import { Router } from "../mod.ts";
+import * as api from "../util/serverApi.ts";
+import * as send from "../util/send.ts";
+import * as extract from "../util/extract.ts";
+import * as util from "../util/util.ts";
 
 export const router = new Router();
 
 // GROUP
-router.post("/api/group/list", async (ctx) => {
+router.post("/group/list", async (ctx) => {
 	const data = await extract.groupList(ctx);
 	if (!data) return;
 
@@ -21,7 +21,7 @@ router.post("/api/group/list", async (ctx) => {
 	});
 });
 
-router.post("/api/group/create", async (ctx) => {
+router.post("/group/create", async (ctx) => {
 	const data = await extract.groupCreate(ctx);
 	if (!data) return;
 
@@ -33,7 +33,7 @@ router.post("/api/group/create", async (ctx) => {
 	return send.success(ctx);
 });
 
-router.post("/api/group/delete", async (ctx) => {
+router.post("/group/delete", async (ctx) => {
 	const data = await extract.groupDelete(ctx);
 	if (!data) return;
 
@@ -45,7 +45,7 @@ router.post("/api/group/delete", async (ctx) => {
 	return send.success(ctx);
 });
 
-router.post("/api/group/rename", async (ctx) => {
+router.post("/group/rename", async (ctx) => {
 	const data = await extract.groupRename(ctx);
 	if (!data) return;
 
@@ -59,7 +59,7 @@ router.post("/api/group/rename", async (ctx) => {
 
 /* ---------------------- document ---------------------- */
 
-router.post("/api/document/create", async (ctx) => {
+router.post("/document/create", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {
 			const data = await extract.documentCreateSingle(ctx);
@@ -86,7 +86,7 @@ router.post("/api/document/create", async (ctx) => {
 	});
 });
 
-router.post("/api/document/read", async (ctx) => {
+router.post("/document/read", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {
 			const data = await extract.documentReadSingle(ctx);
@@ -117,7 +117,7 @@ router.post("/api/document/read", async (ctx) => {
 	});
 });
 
-router.post("/api/document/write", async (ctx) => {
+router.post("/document/write", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {
 			const data = await extract.documentWriteSingle(ctx);
@@ -148,7 +148,7 @@ router.post("/api/document/write", async (ctx) => {
 	});
 });
 
-router.post("/api/document/rename", async (ctx) => {
+router.post("/document/rename", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {
 			const data = await extract.documentRenameSingle(ctx);
@@ -179,7 +179,7 @@ router.post("/api/document/rename", async (ctx) => {
 	});
 });
 
-router.post("/api/document/delete", async (ctx) => {
+router.post("/document/delete", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {
 			const data = await extract.documentDeleteSingle(ctx);
@@ -206,7 +206,7 @@ router.post("/api/document/delete", async (ctx) => {
 	});
 });
 
-router.post("/api/document/list", async (ctx) => {
+router.post("/document/list", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {
 			const data = await extract.documentListSingle(ctx);
@@ -237,7 +237,7 @@ router.post("/api/document/list", async (ctx) => {
 	});
 });
 
-router.post("/api/document/query", async (ctx) => {
+router.post("/document/query", async (ctx) => {
 	await util.onKind(ctx, {
 		single: async () => {
 			const data = await extract.documentQuerySingle(ctx);

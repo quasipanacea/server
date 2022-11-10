@@ -1,6 +1,6 @@
 import { Context } from "../mod.ts";
 import * as util from "./util.ts";
-import * as schema from "../../common/schema.ts";
+import * as schema from "../../../common/schema.ts";
 
 // GROUP
 export function groupList(ctx: Context) {
