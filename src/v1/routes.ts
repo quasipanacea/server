@@ -1,8 +1,8 @@
 import { Router } from "../mod.ts";
-import * as api from "../util/serverApi.ts";
-import * as send from "../util/send.ts";
-import * as extract from "../util/extract.ts";
-import * as util from "../util/util.ts";
+import * as api from "./api.ts";
+import * as send from "./send.ts";
+import * as extract from "./extract.ts";
+import * as util from "./util.ts";
 
 export const router = new Router();
 

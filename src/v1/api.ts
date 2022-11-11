@@ -1,6 +1,6 @@
-import { fs, path, z } from "../mod.ts";
+import { fs, path } from "../mod.ts";
 import * as util from "./util.ts";
-import { log } from "./logger.ts";
+import { log } from "../util/logger.ts";
 import * as error from "../error.ts";
 
 type Result<T, U> = Promise<
