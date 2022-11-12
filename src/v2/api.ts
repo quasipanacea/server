@@ -17,11 +17,9 @@ function notok(error: Error): ResultNotOk {
 
 //
 //
-// Galaxy Group
-export async function galaxyGroupAdd(
-	name: string
-): Result<schema.galaxyGroupAdd_resT> {
-	const root = util.getGalaxyClusterDir();
+// Area
+export async function areaAdd(name: string): Result<schema.areaAdd_resT> {
+	const root = util.getDefaultDir();
 
 	const result = await dir.add(root, name);
 	if (result instanceof Error) return notok(result);
@@ -29,10 +27,8 @@ export async function galaxyGroupAdd(
 	return ok({});
 }
 
-export async function galaxyGroupRemove(
-	name: string
-): Result<schema.galaxyGroupRemove_resT> {
-	const root = util.getGalaxyClusterDir();
+export async function areaRemove(name: string): Result<schema.areaRemove_resT> {
+	const root = util.getDefaultDir();
 
 	const result = await dir.remove(root, name);
 	if (result instanceof Error) return notok(result);
@@ -40,11 +36,11 @@ export async function galaxyGroupRemove(
 	return ok({});
 }
 
-export async function galaxyGroupRename(
+export async function areaRename(
 	oldName: string,
 	newName: string
-): Result<schema.galaxyGroupRename_resT> {
-	const root = util.getGalaxyClusterDir();
+): Result<schema.areaRename_resT> {
+	const root = util.getDefaultDir();
 
 	const result = await dir.rename(root, oldName, newName);
 	if (result instanceof Error) return notok(result);
@@ -52,56 +48,54 @@ export async function galaxyGroupRename(
 	return ok({});
 }
 
-export async function galaxyGroupList(): Result<schema.galaxyGroupList_resT> {
-	const root = util.getGalaxyClusterDir();
+export async function areaList(): Result<schema.areaList_resT> {
+	const root = util.getDefaultDir();
 
 	const result = await dir.list(root);
 	if (result instanceof Error) return notok(result);
 
-	return ok({ galaxyGroups: result });
+	return ok({ areas: result });
 }
 
 //
 //
-// Galaxy
-export async function galaxyAdd(
+// Topic
+export async function topicAdd(
 	group: string,
 	name: string
-): Result<schema.galaxyAdd_resT> {
-	const root = util.getGalaxyGroupDir(group);
+): Result<schema.topicAdd_resT> {
+	const root = util.getAreaDir(group);
 
 	const result = await dir.add(root, name);
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
 }
-export async function galaxyRemove(
+export async function topicRemove(
 	group: string,
 	name: string
-): Result<schema.galaxyRemove_resT> {
-	const root = util.getGalaxyGroupDir(group);
+): Result<schema.topicRemove_resT> {
+	const root = util.getAreaDir(group);
 
 	const result = await dir.remove(root, name);
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
 }
-export async function galaxyRename(
+export async function topicRename(
 	group: string,
 	oldName: string,
 	newName: string
-): Result<schema.galaxyRename_resT> {
-	const root = util.getGalaxyGroupDir(group);
+): Result<schema.topicRename_resT> {
+	const root = util.getAreaDir(group);
 
 	const result = await dir.rename(root, oldName, newName);
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
 }
-export async function galaxyList(
-	group: string
-): Result<schema.galaxyList_resT> {
-	const root = util.getGalaxyGroupDir(group);
+export async function topicList(group: string): Result<schema.topicList_resT> {
+	const root = util.getAreaDir(group);
 
 	const result = await dir.list(root);
 	if (result instanceof Error) return notok(result);
@@ -111,52 +105,52 @@ export async function galaxyList(
 
 //
 //
-// Star
-export async function starAdd(
-	galaxyGroup: string,
-	galaxy: string,
+// note
+export async function noteAdd(
+	area: string,
+	topic: string,
 	name: string
-): Result<schema.starAdd_resT> {
-	const root = util.getGalaxyDir(galaxyGroup, galaxy);
+): Result<schema.noteAdd_resT> {
+	const root = util.getTopicDir(area, topic);
 
 	const result = await dir.add(root, name);
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
 }
-export async function starRemove(
-	galaxyGroup: string,
-	galaxy: string,
+export async function noteRemove(
+	area: string,
+	topic: string,
 	name: string
-): Result<schema.starRemove_resT> {
-	const root = util.getGalaxyDir(galaxyGroup, galaxy);
+): Result<schema.noteRemove_resT> {
+	const root = util.getTopicDir(area, topic);
 
 	const result = await dir.remove(root, name);
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
 }
-export async function starRename(
-	galaxyGroup: string,
-	galaxy: string,
+export async function noteRename(
+	area: string,
+	topic: string,
 	oldName: string,
 	newName: string
-): Result<schema.starRename_resT> {
-	const root = util.getGalaxyDir(galaxyGroup, galaxy);
+): Result<schema.noteRename_resT> {
+	const root = util.getTopicDir(area, topic);
 
 	const result = await dir.rename(root, oldName, newName);
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
 }
-export async function starList(
-	galaxyGroup: string,
-	galaxy: string
-): Result<schema.starList_resT> {
-	const root = util.getGalaxyDir(galaxyGroup, galaxy);
+export async function noteList(
+	area: string,
+	topic: string
+): Result<schema.noteList_resT> {
+	const root = util.getTopicDir(area, topic);
 
 	const result = await dir.list(root);
 	if (result instanceof Error) return notok(result);
 
-	return ok({ stars: result });
+	return ok({ notes: result });
 }

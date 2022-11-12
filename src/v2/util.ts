@@ -3,39 +3,31 @@ import * as send from "./send.ts";
 import { UnknownError } from "../error.ts";
 import { config } from "../config.ts";
 
-export function getGalaxyClusterDir(dir = "Default") {
-	return path.join(config.documentsDir, dir);
+export function getDefaultDir() {
+	return path.join(config.documentsDir, "Default");
 }
-export function getGalaxyGroupDir(galaxyGroupName: string) {
-	return path.join(getGalaxyClusterDir(), galaxyGroupName);
-}
-
-export function getGalaxyDir(galaxyGroupName: string, galaxyName: string) {
-	return path.join(getGalaxyClusterDir(), galaxyGroupName, galaxyName);
+export function getAreaDir(areaName: string) {
+	return path.join(getDefaultDir(), areaName);
 }
 
-export function getStarDir(
-	galaxyGroupName: string,
-	galaxyName: string,
-	starName: string
+export function getTopicDir(areaName: string, topicName: string) {
+	return path.join(getDefaultDir(), areaName, topicName);
+}
+
+export function getNoteDir(
+	areaName: string,
+	topicName: string,
+	noteName: string
 ) {
-	return path.join(
-		getGalaxyClusterDir(),
-		galaxyGroupName,
-		galaxyName,
-		starName
-	);
+	return path.join(getDefaultDir(), areaName, topicName, noteName);
 }
 
-export function getStarFile(
-	galaxyGroupName: string,
-	galaxyName: string,
-	starName: string
+export function getNoteFile(
+	areaName: string,
+	topicName: string,
+	noteName: string
 ) {
-	return path.join(
-		getStarDir(galaxyGroupName, galaxyName, starName),
-		`${starName}.md`
-	);
+	return path.join(getNoteDir(areaName, topicName, noteName), `${noteName}.md`);
 }
 
 export async function unwrap<T>(

@@ -4,63 +4,57 @@ import * as schema from "../../../common/schemaV2.ts";
 
 //
 //
-// Galaxy Group
-export function galaxyGroupAdd(ctx: Context) {
-	return util.unwrap<schema.galaxyGroupAdd_reqT>(
-		ctx,
-		schema.galaxyGroupAdd_req
-	);
+// Area
+export function areaAdd(ctx: Context) {
+	return util.unwrap<schema.areaAdd_reqT>(ctx, schema.areaAdd_req);
 }
 
-export function galaxyGroupRemove(ctx: Context) {
-	return util.unwrap<schema.galaxyGroupRemove_reqT>(
-		ctx,
-		schema.galaxyGroupRemove_req
-	);
+export function areaRemove(ctx: Context) {
+	return util.unwrap<schema.areaRemove_reqT>(ctx, schema.areaRemove_req);
 }
 
-export function galaxyGroupRename(ctx: Context) {
-	return util.unwrap<schema.galaxyGroupRename_reqT>(
-		ctx,
-		schema.galaxyGroupRename_req
-	);
+export function areaRename(ctx: Context) {
+	return util.unwrap<schema.areaRename_reqT>(ctx, schema.areaRename_req);
 }
 
-export function galaxyGroupList(ctx: Context) {
-	return util.unwrap<schema.galaxyGroupList_reqT>(
-		ctx,
-		schema.galaxyGroupList_req
-	);
+export function areaList(ctx: Context) {
+	return util.unwrap<schema.areaList_reqT>(ctx, schema.areaList_req);
 }
 
 //
 //
-// Galaxy
-export function galaxyAdd(ctx: Context) {
-	return util.unwrap<schema.galaxyAdd_reqT>(ctx, schema.galaxyAdd_req);
+// Topic
+export function topicAdd(ctx: Context) {
+	return util.unwrap<schema.topicAdd_reqT>(ctx, schema.topicAdd_req);
 }
-export function galaxyRemove(ctx: Context) {
-	return util.unwrap<schema.galaxyRemove_reqT>(ctx, schema.galaxyRemove_req);
+
+export function topicRemove(ctx: Context) {
+	return util.unwrap<schema.topicRemove_reqT>(ctx, schema.topicRemove_req);
 }
-export function galaxyRename(ctx: Context) {
-	return util.unwrap<schema.galaxyRename_reqT>(ctx, schema.galaxyRename_req);
+
+export function topicRename(ctx: Context) {
+	return util.unwrap<schema.topicRename_reqT>(ctx, schema.topicRename_req);
 }
-export function galaxyList(ctx: Context) {
-	return util.unwrap<schema.galaxyList_reqT>(ctx, schema.galaxyList_req);
+
+export function topicList(ctx: Context) {
+	return util.unwrap<schema.topicList_reqT>(ctx, schema.topicList_req);
 }
 
 //
 //
-// Star
-export function starAdd(ctx: Context) {
-	return util.unwrap<schema.starAdd_reqT>(ctx, schema.starAdd_req);
+// Note
+export function noteAdd(ctx: Context) {
+	return util.unwrap<schema.noteAdd_reqT>(ctx, schema.noteAdd_req);
 }
-export function starRemove(ctx: Context) {
-	return util.unwrap<schema.starRemove_reqT>(ctx, schema.starRemove_req);
+
+export function noteRemove(ctx: Context) {
+	return util.unwrap<schema.noteRemove_reqT>(ctx, schema.noteRemove_req);
 }
-export function starRename(ctx: Context) {
-	return util.unwrap<schema.starRename_reqT>(ctx, schema.starRename_req);
+
+export function noteRename(ctx: Context) {
+	return util.unwrap<schema.noteRename_reqT>(ctx, schema.noteRename_req);
 }
-export function starList(ctx: Context) {
-	return util.unwrap<schema.starList_reqT>(ctx, schema.starList_req);
+
+export function noteList(ctx: Context) {
+	return util.unwrap<schema.noteList_reqT>(ctx, schema.noteList_req);
 }

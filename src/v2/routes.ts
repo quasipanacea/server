@@ -8,42 +8,42 @@ export const router = new Router();
 
 //
 //
-// Galaxy Group
-router.post("/galaxy-group/add", async (ctx) => {
-	const data = await unwrap.galaxyGroupAdd(ctx);
+// Area
+router.post("/area/add", async (ctx) => {
+	const data = await unwrap.areaAdd(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyGroupAdd(data.name);
+	const result = await api.areaAdd(data.name);
 	if (!result.ok) return send.error(ctx, result.error);
 
 	return send.json(ctx, result.data);
 });
 
-router.post("/galaxy-group/remove", async (ctx) => {
-	const data = await unwrap.galaxyGroupRemove(ctx);
+router.post("/area/remove", async (ctx) => {
+	const data = await unwrap.areaRemove(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyGroupRemove(data.name);
+	const result = await api.areaRemove(data.name);
 	if (!result.ok) return send.error(ctx, result.error);
 
 	return send.json(ctx, result.data);
 });
 
-router.post("/galaxy-group/rename", async (ctx) => {
-	const data = await unwrap.galaxyGroupRename(ctx);
+router.post("/area/rename", async (ctx) => {
+	const data = await unwrap.areaRename(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyGroupRename(data.oldName, data.newName);
+	const result = await api.areaRename(data.oldName, data.newName);
 	if (!result.ok) return send.error(ctx, result.error);
 
 	return send.json(ctx, result.data);
 });
 
-router.post("/galaxy-group/list", async (ctx) => {
-	const data = await unwrap.galaxyGroupList(ctx);
+router.post("/area/list", async (ctx) => {
+	const data = await unwrap.areaList(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyGroupList();
+	const result = await api.areaList();
 	if (!result.ok) return send.error(ctx, result.error);
 
 	return send.json(ctx, result.data);
@@ -51,33 +51,77 @@ router.post("/galaxy-group/list", async (ctx) => {
 
 //
 //
-// Galaxy
-router.post("/galaxy/add", async (ctx) => {
-	const data = await unwrap.galaxyAdd(ctx);
+// Topic
+router.post("/topic/add", async (ctx) => {
+	const data = await unwrap.topicAdd(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyAdd(data.galaxyGroup, data.name);
+	const result = await api.topicAdd(data.area, data.name);
 	if (!result.ok) return send.error(ctx, result.error);
 
 	return send.json(ctx, result.data);
 });
 
-router.post("/galaxy/remove", async (ctx) => {
-	const data = await unwrap.galaxyRemove(ctx);
+router.post("/topic/remove", async (ctx) => {
+	const data = await unwrap.topicRemove(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyRemove(data.galaxyGroup, data.name);
+	const result = await api.topicRemove(data.area, data.name);
 	if (!result.ok) return send.error(ctx, result.error);
 
 	return send.json(ctx, result.data);
 });
 
-router.post("/galaxy/rename", async (ctx) => {
-	const data = await unwrap.galaxyRename(ctx);
+router.post("/topic/rename", async (ctx) => {
+	const data = await unwrap.topicRename(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyRename(
-		data.galaxyGroup,
+	const result = await api.topicRename(data.area, data.oldName, data.newName);
+	if (!result.ok) return send.error(ctx, result.error);
+
+	return send.json(ctx, result.data);
+});
+
+router.post("/topic/list", async (ctx) => {
+	const data = await unwrap.topicList(ctx);
+	if (!data) return;
+
+	const result = await api.topicList(data.area);
+	if (!result.ok) return send.error(ctx, result.error);
+
+	return send.json(ctx, result.data);
+});
+
+//
+//
+// Note
+router.post("/note/add", async (ctx) => {
+	const data = await unwrap.noteAdd(ctx);
+	if (!data) return;
+
+	const result = await api.noteAdd(data.area, data.topic, data.name);
+	if (!result.ok) return send.error(ctx, result.error);
+
+	return send.json(ctx, result.data);
+});
+
+router.post("/note/remove", async (ctx) => {
+	const data = await unwrap.noteRemove(ctx);
+	if (!data) return;
+
+	const result = await api.noteRemove(data.area, data.topic, data.name);
+	if (!result.ok) return send.error(ctx, result.error);
+
+	return send.json(ctx, result.data);
+});
+
+router.post("/note/rename", async (ctx) => {
+	const data = await unwrap.noteRename(ctx);
+	if (!data) return;
+
+	const result = await api.noteRename(
+		data.area,
+		data.topic,
 		data.oldName,
 		data.newName
 	);
@@ -86,59 +130,11 @@ router.post("/galaxy/rename", async (ctx) => {
 	return send.json(ctx, result.data);
 });
 
-router.post("/galaxy/list", async (ctx) => {
-	const data = await unwrap.galaxyList(ctx);
+router.post("/note/list", async (ctx) => {
+	const data = await unwrap.noteList(ctx);
 	if (!data) return;
 
-	const result = await api.galaxyList(data.galaxyGroup);
-	if (!result.ok) return send.error(ctx, result.error);
-
-	return send.json(ctx, result.data);
-});
-
-//
-//
-// Stars
-router.post("/star/add", async (ctx) => {
-	const data = await unwrap.starAdd(ctx);
-	if (!data) return;
-
-	const result = await api.starAdd(data.galaxyGroup, data.galaxy, data.name);
-	if (!result.ok) return send.error(ctx, result.error);
-
-	return send.json(ctx, result.data);
-});
-
-router.post("/star/remove", async (ctx) => {
-	const data = await unwrap.starRemove(ctx);
-	if (!data) return;
-
-	const result = await api.starRemove(data.galaxyGroup, data.galaxy, data.name);
-	if (!result.ok) return send.error(ctx, result.error);
-
-	return send.json(ctx, result.data);
-});
-
-router.post("/star/rename", async (ctx) => {
-	const data = await unwrap.starRename(ctx);
-	if (!data) return;
-
-	const result = await api.starRename(
-		data.galaxyGroup,
-		data.galaxy,
-		data.oldName,
-		data.newName
-	);
-	if (!result.ok) return send.error(ctx, result.error);
-
-	return send.json(ctx, result.data);
-});
-
-router.post("/star/list", async (ctx) => {
-	const data = await unwrap.starList(ctx);
-	if (!data) return;
-
-	const result = await api.starList(data.galaxyGroup, data.galaxy);
+	const result = await api.noteList(data.area, data.topic);
 	if (!result.ok) return send.error(ctx, result.error);
 
 	return send.json(ctx, result.data);
