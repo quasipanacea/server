@@ -130,6 +130,36 @@ router.post("/note/rename", async (ctx) => {
 	return send.json(ctx, result.data);
 });
 
+router.post("/note/", async (ctx) => {
+	const data = await unwrap.noteRead(ctx);
+	if (!data) return;
+
+	const result = await api.noteRead(data.area, data.topic);
+	if (!result.ok) return send.error(ctx, result.error);
+
+	return send.json(ctx, result.data);
+});
+
+router.post("/note/", async (ctx) => {
+	const data = await unwrap.noteWrite(ctx);
+	if (!data) return;
+
+	const result = await api.noteWrite(data.area, data.topic);
+	if (!result.ok) return send.error(ctx, result.error);
+
+	return send.json(ctx, result.data);
+});
+
+router.post("/note/", async (ctx) => {
+	const data = await unwrap.noteQuery(ctx);
+	if (!data) return;
+
+	const result = await api.noteQuery(data.area, data.topic);
+	if (!result.ok) return send.error(ctx, result.error);
+
+	return send.json(ctx, result.data);
+});
+
 router.post("/note/list", async (ctx) => {
 	const data = await unwrap.noteList(ctx);
 	if (!data) return;

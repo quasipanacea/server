@@ -4,11 +4,9 @@ import * as util from "./util.ts";
 
 type DirResult<T = null> = Promise<T | Error>;
 
-export async function add(root: string, dirname: string): DirResult {
-	const dir = path.join(root, dirname);
-
+export async function add(dirpath: string): DirResult {
 	try {
-		await Deno.mkdir(dir, { recursive: true });
+		await Deno.mkdir(dirpath, { recursive: true });
 		return null;
 	} catch (err: unknown) {
 		if (!(err instanceof Error)) return new UnknownError(err);
@@ -16,11 +14,9 @@ export async function add(root: string, dirname: string): DirResult {
 	}
 }
 
-export async function remove(root: string, dirname: string): DirResult {
-	const dir = path.join(root, dirname);
-
+export async function remove(dirpath: string): DirResult {
 	try {
-		await Deno.remove(dir, { recursive: true });
+		await Deno.remove(dirpath, { recursive: true });
 		return null;
 	} catch (err: unknown) {
 		if (!(err instanceof Error)) return new UnknownError(err);
@@ -29,15 +25,11 @@ export async function remove(root: string, dirname: string): DirResult {
 }
 
 export async function rename(
-	root: string,
-	oldDirname: string,
-	newDirName: string
+	oldDirpath: string,
+	newDirpath: string
 ): DirResult {
-	const dir1 = path.join(root, oldDirname);
-	const dir2 = path.join(root, newDirName);
-
 	try {
-		await Deno.rename(dir1, dir2);
+		await Deno.rename(oldDirpath, newDirpath);
 		return null;
 	} catch (err: unknown) {
 		if (!(err instanceof Error)) return new UnknownError(err);
@@ -45,13 +37,11 @@ export async function rename(
 	}
 }
 
-export async function list(root: string): DirResult<string[]> {
-	const dir = root;
-
+export async function list(dirpath: string): DirResult<string[]> {
 	try {
 		const dirs = [];
 
-		for await (const entry of Deno.readDir(dir)) {
+		for await (const entry of Deno.readDir(dirpath)) {
 			dirs.push(entry.name);
 		}
 

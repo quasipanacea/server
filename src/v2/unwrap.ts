@@ -55,6 +55,18 @@ export function noteRename(ctx: Context) {
 	return util.unwrap<schema.noteRename_reqT>(ctx, schema.noteRename_req);
 }
 
+export function noteRead(ctx: Context) {
+	return util.unwrap<schema.noteRead_reqT>(ctx, schema.noteRead_req);
+}
+
+export function noteWrite(ctx: Context) {
+	return util.unwrap<schema.noteWrite_reqT>(ctx, schema.noteWrite_req);
+}
+
+export function noteQuery(ctx: Context) {
+	return util.unwrap<schema.noteQuery_reqT>(ctx, schema.noteQuery_req);
+}
+
 export function noteList(ctx: Context) {
 	return util.unwrap<schema.noteList_reqT>(ctx, schema.noteList_req);
 }
