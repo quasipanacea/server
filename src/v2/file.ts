@@ -1,7 +1,34 @@
 import { UnknownError } from "../error.ts";
-import { fs } from "../mod.ts";
+import { fs, path } from "../mod.ts";
 
 type FileResult<T = null> = Promise<T | Error>;
+
+export async function add(filepath: string): FileResult {
+	try {
+		await Deno.mkdir(path.dirname(filepath), { recursive: true });
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) return new UnknownError(err);
+		return err;
+	}
+
+	try {
+		await Deno.writeTextFile(filepath, "");
+		return null;
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) return new UnknownError(err);
+		return err;
+	}
+}
+
+export async function remove(filepath: string): FileResult {
+	try {
+		await Deno.remove(filepath);
+		return null;
+	} catch (err: unknown) {
+		if (!(err instanceof Error)) return new UnknownError(err);
+		return err;
+	}
+}
 
 export async function read(filepath: string): FileResult<string> {
 	try {

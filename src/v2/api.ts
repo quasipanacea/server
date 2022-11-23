@@ -106,7 +106,7 @@ export async function topicList(area: string): Result<schema.topicList_resT> {
 	const result = await dir.list(dirname);
 	if (result instanceof Error) return notok(result);
 
-	return ok({ galaxies: result });
+	return ok({ topics: result });
 }
 
 //
@@ -119,7 +119,7 @@ export async function noteAdd(
 ): Result<schema.noteAdd_resT> {
 	const filename = util.getNoteFile(area, topic, name);
 
-	const result = await dir.add(filename);
+	const result = await file.add(filename);
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
@@ -132,7 +132,7 @@ export async function noteRemove(
 ): Result<schema.noteRemove_resT> {
 	const filename = util.getNoteFile(area, topic, name);
 
-	const result = await dir.remove(filename);
+	const result = await dir.remove(path.dirname(filename));
 	if (result instanceof Error) return notok(result);
 
 	return ok({});
@@ -163,7 +163,7 @@ export async function noteRead(
 	const result = await file.read(filename);
 	if (result instanceof Error) return notok(result);
 
-	return ok({});
+	return ok({ content: result });
 }
 
 export async function noteWrite(

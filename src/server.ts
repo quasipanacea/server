@@ -24,7 +24,6 @@ app.use(async (ctx: Context, next) => {
 
 const router = new Router();
 
-router.use("/api", routesV1.routes());
 router.use("/api/v1", routesV1.routes());
 router.use("/api/v2", routesV2.routes());
 
