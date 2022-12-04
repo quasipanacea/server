@@ -8,6 +8,17 @@ export const router = new Router();
 
 //
 //
+// Capsule
+router.post("/capsule/add", async (ctx) => {});
+
+router.post("/capsule/remove", async (ctx) => {});
+
+router.post("/capsule/remove", async (ctx) => {});
+
+router.post("/capsule/remove", async (ctx) => {});
+
+//
+//
 // Area
 router.post("/area/add", async (ctx) => {
 	const data = await unwrap.areaAdd(ctx);

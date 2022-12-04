@@ -1,6 +1,5 @@
 import { Application, Context, send, Router } from "./mod.ts";
 
-import { router as routesV1 } from "./v1/routes.ts";
 import { router as routesV2 } from "./v2/routes.ts";
 import { init } from "./init.ts";
 
@@ -24,7 +23,6 @@ app.use(async (ctx: Context, next) => {
 
 const router = new Router();
 
-router.use("/api/v1", routesV1.routes());
 router.use("/api/v2", routesV2.routes());
 
 app.use(router.routes());
