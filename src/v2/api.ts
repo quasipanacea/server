@@ -3,6 +3,8 @@ import * as dir from "./dir.ts";
 import * as file from "./file.ts";
 import { path } from "../mod.ts";
 import * as schema from "../../../common/schemaV2.ts";
+import * as util2 from "../util/util.ts";
+import * as podUtils from "../util/podUtils.ts";
 
 type ResultOk<T> = { ok: true; data: T };
 type ResultNotOk = { ok: false; error: Error };
@@ -14,6 +16,75 @@ function ok<T>(data: T): ResultOk<T> {
 
 function notok(error: Error): ResultNotOk {
 	return { ok: false, error };
+}
+
+//
+//
+// Pod
+export async function podAdd(
+	type: string,
+	name: string
+): Promise<schema.podAdd_resT> {
+	const uuid = crypto.randomUUID();
+	const dir = podUtils.podFromUuid(uuid);
+
+	const metaFile = util2.getPodMetafile();
+	const metaJson = JSON.parse(await Deno.readTextFile(metaFile));
+
+	if (!metaJson.pod) {
+		metaJson.pod = {};
+	}
+	metaJson.pod[uuid] = {
+		type,
+		name,
+		progress: "locked",
+	};
+	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+
+	await Deno.mkdir(dir, { recursive: true });
+
+	metaJson.pod[uuid].progress = "done";
+	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+
+	return {};
+}
+export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
+	const dir = path.dirname(podUtils.podFromUuid(uuid));
+
+	const metaFile = util2.getPodMetafile();
+	const metaJson = JSON.parse(await Deno.readTextFile(metaFile));
+	if (!metaJson.pod) {
+		metaJson.pod = {};
+	}
+	if (metaJson.pod[uuid]) {
+		metaJson.pod[uuid].progress = "locked";
+	}
+	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+
+	await Deno.remove(dir, { recursive: true });
+
+	if (metaJson.pod[uuid]) {
+		delete metaJson.pod[uuid];
+	}
+	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+
+	return {};
+}
+export async function podList(): Promise<schema.podList_resT> {
+	const metafile = util2.getPodMetafile();
+	const data = JSON.parse(await Deno.readTextFile(metafile));
+
+	const arr: { uuid: string; type: "markdown" | "plaintext"; name: string }[] =
+		[];
+	for (const [uuid, obj] of Object.entries(data.pod)) {
+		arr.push({
+			uuid,
+			type: obj.type,
+			name: obj.name,
+		});
+	}
+
+	return arr;
 }
 
 //

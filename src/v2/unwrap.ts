@@ -1,6 +1,22 @@
 import { Context } from "../mod.ts";
+import * as utilNew from "../util/util.ts";
 import * as util from "./util.ts";
 import * as schema from "../../../common/schemaV2.ts";
+
+//
+//
+// Pod
+export function podAdd(ctx: Context) {
+	return utilNew.unwrap<schema.podAdd_reqT>(ctx, schema.podAdd_req);
+}
+
+export function podRemove(ctx: Context) {
+	return utilNew.unwrap<schema.podRemove_reqT>(ctx, schema.podRemove_req);
+}
+
+export function podList(ctx: Context) {
+	return utilNew.unwrap<schema.podList_reqT>(ctx, schema.podList_req);
+}
 
 //
 //

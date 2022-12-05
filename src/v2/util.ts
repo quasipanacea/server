@@ -6,6 +6,7 @@ import { config } from "../config.ts";
 export function getDefaultDir() {
 	return path.join(config.documentsDir, "Default");
 }
+
 export function getAreaDir(areaName: string) {
 	return path.join(getDefaultDir(), areaName);
 }

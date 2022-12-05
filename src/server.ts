@@ -2,8 +2,36 @@ import { Application, Context, send, Router } from "./mod.ts";
 
 import { router as routesV2 } from "./v2/routes.ts";
 import { init } from "./init.ts";
+import { Status } from "https://deno.land/std@0.152.0/http/http_status.ts";
+import { JSONError } from "./error.ts";
 
 const app = new Application();
+
+app.use(async ({ response }: Context, next) => {
+	try {
+		await next();
+	} catch (err: unknown) {
+		response.status = Status.InternalServerError;
+		response.headers.set("Content-Type", "application/json");
+
+		let bodyError;
+		if (err instanceof JSONError) {
+			bodyError = err.json;
+		} else if (err instanceof Error) {
+			bodyError = err.message;
+		} else {
+			bodyError = err;
+		}
+
+		response.body = JSON.stringify(
+			{
+				error: bodyError,
+			},
+			null,
+			"\t"
+		);
+	}
+});
 
 app.use(async ({ request: req }: Context, next) => {
 	console.log(`${req.method} ${req.url.pathname}`);

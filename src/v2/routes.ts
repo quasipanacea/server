@@ -1,21 +1,49 @@
-import { Router } from "../mod.ts";
+import { Context, Router, Status } from "../mod.ts";
+import { podMarkdownNewByName } from "../plugins/pod/pod-markdown/controller.ts";
 import * as api from "./api.ts";
 import * as send from "./send.ts";
 import * as unwrap from "./unwrap.ts";
 import * as util from "./util.ts";
 
+import podPlaintextRouter from "../plugins/pod/pod-plaintext/router.ts";
+import podMarkdownRouter from "../plugins/pod/pod-markdown/router.ts";
+
 export const router = new Router();
 
 //
 //
-// Capsule
-router.post("/capsule/add", async (ctx) => {});
+// Pod
+router.post("/pod/add", async (ctx) => {
+	const data = await unwrap.podAdd(ctx);
+	const result = await api.podAdd(data.type, data.name);
 
-router.post("/capsule/remove", async (ctx) => {});
+	return send.json(ctx, result);
+});
 
-router.post("/capsule/remove", async (ctx) => {});
+router.post("/pod/remove", async (ctx) => {
+	const data = await unwrap.podRemove(ctx);
+	const result = await api.podRemove(data.uuid);
 
-router.post("/capsule/remove", async (ctx) => {});
+	return send.json(ctx, result);
+});
+
+router.post("/pod/list", async (ctx) => {
+	const data = await unwrap.podList(ctx);
+	const result = await api.podList();
+
+	return send.json(ctx, result);
+});
+
+const ok = ({ response }: Context) => {
+	response.status = Status.OK;
+	response.headers.set("Content-Type", "application/json");
+	response.body = JSON.stringify({ ok: true }, null, "\t");
+};
+
+podPlaintextRouter.post("/", ok);
+router.use("/pod/rpc/plaintext", podPlaintextRouter.routes());
+podMarkdownRouter.post("/", ok);
+router.use("/pod/rpc/markdown", podMarkdownRouter.routes());
 
 //
 //
