@@ -1,8 +1,8 @@
 import { config } from "../config.ts";
-import { JSONError } from "../error.ts";
+import { JSONError } from "../errors.ts";
 import { path, Context, z } from "../mod.ts";
-import * as send from "./send.ts";
 
+// flat
 export function getDataDir() {
 	return path.join(config.documentsDir, "data");
 }
@@ -13,6 +13,45 @@ export function getPodDir() {
 
 export function getPodMetafile() {
 	return path.join(getDataDir(), "pods.json");
+}
+
+// hier
+export function getDefaultDir() {
+	return path.join(config.documentsDir, "Default");
+}
+
+export function getAreaDir(areaName: string) {
+	return path.join(getDefaultDir(), areaName);
+}
+
+export function getTopicDir(areaName: string, topicName: string) {
+	return path.join(getDefaultDir(), areaName, topicName);
+}
+
+export function getNoteDir(
+	areaName: string,
+	topicName: string,
+	noteName: string
+) {
+	return path.join(getDefaultDir(), areaName, topicName, noteName);
+}
+
+export function getNoteFile(
+	areaName: string,
+	topicName: string,
+	noteName: string
+) {
+	return path.join(getNoteDir(areaName, topicName, noteName), `${noteName}.md`);
+}
+
+export async function dirlist(dirpath: string): Promise<string[]> {
+	const dirs = [];
+
+	for await (const entry of Deno.readDir(dirpath)) {
+		dirs.push(entry.name);
+	}
+
+	return dirs;
 }
 
 export async function unwrap<T>(

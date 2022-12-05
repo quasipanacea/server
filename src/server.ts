@@ -3,7 +3,7 @@ import { Application, Context, send, Router } from "./mod.ts";
 import { router as routesV2 } from "./v2/routes.ts";
 import { init } from "./init.ts";
 import { Status } from "https://deno.land/std@0.152.0/http/http_status.ts";
-import { JSONError } from "./error.ts";
+import { JSONError } from "./errors.ts";
 
 const app = new Application();
 
@@ -41,7 +41,8 @@ app.use(async ({ request: req }: Context, next) => {
 app.use(async (ctx: Context, next) => {
 	const pathname = ctx.request.url.pathname;
 	if (!pathname.startsWith("/public")) {
-		return await next();
+		await next();
+		return;
 	}
 
 	await send(ctx, pathname.slice("/public".length), {

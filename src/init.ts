@@ -1,5 +1,5 @@
 import { getDataDir, getPodMetafile } from "./util/util.ts";
-import * as util from "./v2/util.ts";
+import * as util from "./util/util.ts";
 
 export async function init() {
 	const dir = await util.getDefaultDir();

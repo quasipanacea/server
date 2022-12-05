@@ -1,6 +1,6 @@
 import { Router } from "../../../mod.ts";
 import { generatePdf, openPdfInNativeApp } from "./controller.ts";
-import * as send from "../../../util/send.ts";
+import * as send from "../../../util/sendUtils.ts";
 
 const router = new Router();
 export default router;

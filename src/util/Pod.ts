@@ -1,4 +1,5 @@
 import { path } from "../mod.ts";
+import { podFromUuid } from "./podUtils.ts";
 
 type FileSpec = {
 	byteType: "text" | "binary";
