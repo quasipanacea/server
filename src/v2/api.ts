@@ -7,69 +7,110 @@ import * as podUtils from "../util/podUtils.ts";
 //
 // Pod
 export async function podAdd(
-	type: string,
+	wraps: string,
 	name: string
 ): Promise<schema.podAdd_resT> {
 	const uuid = crypto.randomUUID();
 	const dir = podUtils.podFromUuid(uuid);
 
-	const metaFile = util.getPodMetafile();
-	const metaJson = JSON.parse(await Deno.readTextFile(metaFile));
-
-	if (!metaJson.pod) {
-		metaJson.pod = {};
-	}
-	metaJson.pod[uuid] = {
-		type,
-		name,
-		progress: "locked",
-	};
-	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+	const metafilePath = util.getPodMetafile();
+	const metafileJson = JSON.parse(await Deno.readTextFile(metafilePath));
 
 	await Deno.mkdir(dir, { recursive: true });
+	{
+		const pluginName = "Pod" + wraps[0].toLocaleUpperCase() + wraps.slice(1);
+		let onCreate;
+		try {
+			({ onCreate } = await import(
+				`../../../common/plugins/Core/${pluginName}/api.ts`
+			));
+		} catch {
+			await Deno.remove(path.dirname(dir), { recursive: true });
+			throw new Error(`PluginPod ${pluginName} not found`);
+		}
+		await onCreate(dir);
+	}
 
-	metaJson.pod[uuid].progress = "done";
-	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+	if (!metafileJson.pods) {
+		metafileJson.pods = {};
+	}
+	metafileJson.pods[uuid] = { wraps, name };
+	await Deno.writeTextFile(
+		metafilePath,
+		JSON.stringify(metafileJson, null, "\t")
+	);
 
 	return {};
 }
+
 export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
 	const dir = path.dirname(podUtils.podFromUuid(uuid));
 
-	const metaFile = util.getPodMetafile();
-	const metaJson = JSON.parse(await Deno.readTextFile(metaFile));
-	if (!metaJson.pod) {
-		metaJson.pod = {};
-	}
-	if (metaJson.pod[uuid]) {
-		metaJson.pod[uuid].progress = "locked";
-	}
-	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+	const metafilePath = util.getPodMetafile();
+	const metafileJson = JSON.parse(await Deno.readTextFile(metafilePath));
 
+	if (!metafileJson.pods) {
+		metafileJson.pods = {};
+	}
+	const wraps = metafileJson.pods[uuid].wraps;
+	if (!wraps) {
+		throw new Error("should not be undefined or empty");
+	}
+
+	{
+		const pluginName = "Pod" + wraps[0].toLocaleUpperCase() + wraps.slice(1);
+		const { onRemove } = await import(
+			`../../../common/plugins/Core/${pluginName}/api.ts`
+		);
+		await onRemove(dir);
+	}
 	await Deno.remove(dir, { recursive: true });
 
-	if (metaJson.pod[uuid]) {
-		delete metaJson.pod[uuid];
+	if (metafileJson.pods[uuid]) {
+		delete metafileJson.pods[uuid];
 	}
-	await Deno.writeTextFile(metaFile, JSON.stringify(metaJson, null, "\t"));
+	await Deno.writeTextFile(
+		metafilePath,
+		JSON.stringify(metafileJson, null, "\t")
+	);
 
 	return {};
 }
-export async function podList(): Promise<schema.podList_resT> {
+
+export async function podList(wraps: string): Promise<schema.podList_resT> {
 	const metafile = util.getPodMetafile();
 	const data = JSON.parse(await Deno.readTextFile(metafile));
 
-	const arr: { uuid: string; type: "markdown" | "plaintext"; name: string }[] =
-		[];
-	for (const [uuid, obj] of Object.entries(data.pod)) {
-		arr.push({
-			uuid,
-			type: obj.type,
-			name: obj.name,
-		});
+	const pods: schema.podList_resT["pods"] = [];
+	for (const [uuid, obj] of Object.entries(data.pods)) {
+		if (obj.wraps == wraps) {
+			pods.push({
+				uuid,
+				wraps: obj.wraps,
+				name: obj.name,
+			});
+		}
 	}
 
-	return { pods: arr };
+	return { pods };
+}
+
+export async function podListPlugins(): Promise<schema.podListPlugins_resT> {
+	const plugins: { name: string; wraps: string }[] = [];
+
+	for await (const file of await Deno.readDir("./common/plugins/Core")) {
+		if (file.name.startsWith("Pod")) {
+			const index: { wraps: string } = await import(
+				`../../common/plugins/Core/${file.name}/index.ts`
+			);
+
+			plugins.push({ name: file.name, wraps: index.wraps });
+		}
+	}
+
+	return {
+		plugins,
+	};
 }
 
 //
@@ -169,7 +210,11 @@ export async function noteAdd(
 ): Promise<schema.noteAdd_resT> {
 	const filename = util.getNoteFile(area, topic, name);
 
-	const f = await Deno.open(filename, { createNew: true, create: true });
+	await Deno.mkdir(path.dirname(filename), { recursive: true });
+	const f = await Deno.open(filename, {
+		createNew: true,
+		write: true,
+	});
 	f.close();
 
 	return {};

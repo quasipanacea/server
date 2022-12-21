@@ -17,6 +17,13 @@ export function podList(ctx: Context) {
 	return util.unwrap<schema.podList_reqT>(ctx, schema.podList_req);
 }
 
+export function podListPlugins(ctx: Context) {
+	return util.unwrap<schema.podListPlugins_reqT>(
+		ctx,
+		schema.podListPlugins_req
+	);
+}
+
 //
 //
 // Area

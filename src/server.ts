@@ -11,6 +11,8 @@ app.use(async ({ response }: Context, next) => {
 	try {
 		await next();
 	} catch (err: unknown) {
+		console.log(err);
+
 		response.status = Status.InternalServerError;
 		response.headers.set("Content-Type", "application/json");
 

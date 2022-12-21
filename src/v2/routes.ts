@@ -1,10 +1,7 @@
-import { Router } from "../mod.ts";
+import { path, Router } from "../mod.ts";
 import * as api from "./api.ts";
 import * as sendUtils from "../util/sendUtils.ts";
 import * as unwrap from "./unwrap.ts";
-
-import podPlaintextRouter from "../plugins/pod/pod-plaintext/router.ts";
-import podMarkdownRouter from "../plugins/pod/pod-markdown/router.ts";
 
 export const router = new Router();
 
@@ -13,7 +10,7 @@ export const router = new Router();
 // Pod
 router.post("/pod/add", async (ctx) => {
 	const data = await unwrap.podAdd(ctx);
-	const result = await api.podAdd(data.type, data.name);
+	const result = await api.podAdd(data.wraps, data.name);
 
 	return sendUtils.json(ctx, result);
 });
@@ -26,16 +23,33 @@ router.post("/pod/remove", async (ctx) => {
 });
 
 router.post("/pod/list", async (ctx) => {
-	await unwrap.podList(ctx);
-	const result = await api.podList();
+	const data = await unwrap.podList(ctx);
+	const result = await api.podList(data.wraps);
 
 	return sendUtils.json(ctx, result);
 });
 
-podPlaintextRouter.post("/", sendUtils.success);
-router.use("/pod/rpc/plaintext", podPlaintextRouter.routes());
-podMarkdownRouter.post("/", sendUtils.success);
-router.use("/pod/rpc/markdown", podMarkdownRouter.routes());
+router.post("/pod/list-plugins", async (ctx) => {
+	await unwrap.podListPlugins(ctx);
+	const result = await api.podListPlugins();
+
+	return sendUtils.json(ctx, result);
+});
+
+for await (const file of await Deno.readDir("./common/plugins/Core")) {
+	if (!file.name.startsWith("Pod")) continue;
+
+	const index: { wraps: string } = await import(
+		`../../common/plugins/Core/${file.name}/index.ts`
+	);
+	const { router: subrouter }: { router: Router } = await import(
+		`../../common/plugins/Core/${file.name}/router.ts`
+	);
+
+	subrouter.get("/", sendUtils.success);
+	router.use(`/pod/plugin/${index.wraps}`, subrouter.routes());
+	console.log(`Loading: ${file.name} (${index.wraps})`);
+}
 
 //
 //
