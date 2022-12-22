@@ -113,6 +113,17 @@ export async function podListPlugins(): Promise<schema.podListPlugins_resT> {
 	};
 }
 
+export async function podQuery(uuid: string): Promise<schema.podQuery_resT> {
+	const podsDatafile = util.getPodMetafile();
+	const podsJson = JSON.parse(await Deno.readTextFile(podsDatafile));
+
+	if (podsJson?.pods?.[uuid]) {
+		return podsJson.pods[uuid];
+	} else {
+		return { wraps: "", name: "" };
+	}
+}
+
 //
 //
 // Area

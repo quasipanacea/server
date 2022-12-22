@@ -36,6 +36,13 @@ router.post("/pod/list-plugins", async (ctx) => {
 	return sendUtils.json(ctx, result);
 });
 
+router.post("/pod/query", async (ctx) => {
+	const data = await unwrap.podQuery(ctx);
+	const result = await api.podQuery(data.uuid);
+
+	return sendUtils.json(ctx, result);
+});
+
 for await (const file of await Deno.readDir("./common/plugins/Core")) {
 	if (!file.name.startsWith("Pod")) continue;
 

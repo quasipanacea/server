@@ -24,6 +24,10 @@ export function podListPlugins(ctx: Context) {
 	);
 }
 
+export function podQuery(ctx: Context) {
+	return util.unwrap<schema.podQuery_reqT>(ctx, schema.podQuery_req);
+}
+
 //
 //
 // Area
