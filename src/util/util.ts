@@ -1,6 +1,5 @@
-import { config } from "../config.ts";
-import { JSONError } from "../errors.ts";
-import { path, Context, z } from "../mod.ts";
+import { path, Context, z } from "@src/mod.ts";
+import { config } from "@src/util/config.ts";
 
 // flat
 export function getDataDir() {
@@ -67,4 +66,14 @@ export async function unwrap<T>(
 	}
 
 	return json;
+}
+
+export class JSONError extends Error {
+	json: Record<string, unknown>;
+
+	constructor(json: Record<string, unknown>) {
+		super(`JSON Error: ${JSON.stringify(json, null, "\t")}`);
+		this.name = this.constructor.name;
+		this.json = json;
+	}
 }

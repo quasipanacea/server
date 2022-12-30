@@ -1,7 +1,8 @@
-import { path, Router } from "../mod.ts";
-import * as api from "./api.ts";
-import * as sendUtils from "../util/sendUtils.ts";
-import * as unwrap from "./unwrap.ts";
+import { Router } from "@src/mod.ts";
+import * as sendUtils from "@src/util/sendUtils.ts";
+import * as pluginUtils from "@src/util/pluginUtils.ts";
+import * as unwrap from "@src/v2/unwrap.ts";
+import * as api from "@src/v2/api.ts";
 
 export const router = new Router();
 
@@ -43,20 +44,7 @@ router.post("/pod/query", async (ctx) => {
 	return sendUtils.json(ctx, result);
 });
 
-for await (const file of await Deno.readDir("./common/plugins/Core")) {
-	if (!file.name.startsWith("Pod")) continue;
-
-	const index: { wraps: string } = await import(
-		`../../common/plugins/Core/${file.name}/index.ts`
-	);
-	const { router: subrouter }: { router: Router } = await import(
-		`../../common/plugins/Core/${file.name}/router.ts`
-	);
-
-	subrouter.get("/", sendUtils.success);
-	router.use(`/pod/plugin/${index.wraps}`, subrouter.routes());
-	console.log(`Loading: ${file.name} (${index.wraps})`);
-}
+await pluginUtils.loadPodRoutes(router);
 
 //
 //

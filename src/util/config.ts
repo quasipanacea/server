@@ -1,5 +1,5 @@
-import { path } from "./mod.ts";
 import { z } from "zod";
+import { path } from "@src/mod.ts";
 
 const schema = z.object({
 	documentsDir: z.string().min(1),

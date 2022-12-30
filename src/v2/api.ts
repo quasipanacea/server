@@ -1,7 +1,9 @@
-import { fs, path } from "../mod.ts";
-import * as schema from "../../../common/schemaV2.ts";
-import * as util from "../util/util.ts";
-import * as podUtils from "../util/podUtils.ts";
+import { fs, path } from "@src/mod.ts";
+import * as util from "@src/util/util.ts";
+import * as podUtils from "@src/util/podUtils.ts";
+import * as pluginUtils from "@src/util/pluginUtils.ts";
+
+import * as schema from "@common/schemaV2.ts";
 
 //
 //
@@ -17,19 +19,9 @@ export async function podAdd(
 	const metafileJson = JSON.parse(await Deno.readTextFile(metafilePath));
 
 	await Deno.mkdir(dir, { recursive: true });
-	{
-		const pluginName = "Pod" + wraps[0].toLocaleUpperCase() + wraps.slice(1);
-		let onCreate;
-		try {
-			({ onCreate } = await import(
-				`../../../common/plugins/Core/${pluginName}/api.ts`
-			));
-		} catch {
-			await Deno.remove(path.dirname(dir), { recursive: true });
-			throw new Error(`PluginPod ${pluginName} not found`);
-		}
-		await onCreate(dir);
-	}
+
+	const { onCreate } = pluginUtils.getPodHooks(dir, wraps);
+	await onCreate(dir);
 
 	if (!metafileJson.pods) {
 		metafileJson.pods = {};
@@ -57,13 +49,8 @@ export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
 		throw new Error("should not be undefined or empty");
 	}
 
-	{
-		const pluginName = "Pod" + wraps[0].toLocaleUpperCase() + wraps.slice(1);
-		const { onRemove } = await import(
-			`../../../common/plugins/Core/${pluginName}/api.ts`
-		);
-		await onRemove(dir);
-	}
+	const { onRemove } = pluginUtils.getPodHooks(dir, wraps);
+	await onRemove(dir);
 	await Deno.remove(dir, { recursive: true });
 
 	if (metafileJson.pods[uuid]) {

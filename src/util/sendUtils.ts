@@ -1,6 +1,9 @@
-import { Context, Status } from "../mod.ts";
+import { Context, Status, z } from "@src/mod.ts";
 
-export function json(ctx: Context, obj: Record<string, unknown>) {
+export function json(
+	ctx: Context,
+	obj: Record<string, unknown> | z.AnyZodObject
+) {
 	ctx.response.status = Status.OK;
 	ctx.response.headers.set("Content-Type", "application/json");
 	ctx.response.body = JSON.stringify(obj, null, "\t");

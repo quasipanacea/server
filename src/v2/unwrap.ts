@@ -1,6 +1,7 @@
-import { Context } from "../mod.ts";
-import * as util from "../util/util.ts";
-import * as schema from "../../../common/schemaV2.ts";
+import { Context } from "@src/mod.ts";
+import * as util from "@src/util/util.ts";
+
+import * as schema from "@common/schemaV2.ts";
 
 //
 //

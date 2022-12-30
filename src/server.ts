@@ -1,9 +1,7 @@
-import { Application, Context, send, Router } from "./mod.ts";
-
-import { router as routesV2 } from "./v2/routes.ts";
-import { init } from "./init.ts";
-import { Status } from "https://deno.land/std@0.152.0/http/http_status.ts";
-import { JSONError } from "./errors.ts";
+import { Application, Context, send, Router, Status } from "@src/mod.ts";
+import { init } from "@src/init.ts";
+import { JSONError } from "@src/util/util.ts";
+import { router as routesV2 } from "@src/v2/routes.ts";
 
 const app = new Application();
 
