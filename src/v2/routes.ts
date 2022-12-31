@@ -1,6 +1,6 @@
 import { Router } from "@src/mod.ts";
 import * as utilsSend from "@src/util/utilsSend.ts";
-import * as utilsPlugins from "@src/util/utilsPlugins.ts";
+import * as utilsPlugin from "@src/util/utilsPlugin.ts";
 import * as unwrap from "@src/v2/unwrap.ts";
 import * as api from "@src/v2/api.ts";
 
@@ -44,7 +44,7 @@ router.post("/pod/query", async (ctx) => {
 	return utilsSend.json(ctx, result);
 });
 
-await utilsPlugins.loadPodRoutes(router);
+await utilsPlugin.loadPodRoutes(router);
 
 //
 //

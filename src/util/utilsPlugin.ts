@@ -3,8 +3,12 @@ import * as util from "@src/util/util.ts";
 import { Hooks, Endpoint } from "@src/util/types.ts";
 import * as utilsSend from "@src/util/utilsSend.ts";
 import * as utilsPod from "@src/util/utilsPod.ts";
+import { schemaPluginToml } from "./schemas.ts";
 
-export async function getPodHooks(dir: string, pluginType: string) {
+export async function getPodHooks(
+	dir: string,
+	pluginType: string
+): Promise<Hooks> {
 	const pluginName =
 		"Pod" + pluginType[0].toLocaleUpperCase() + pluginType.slice(1);
 
@@ -98,9 +102,11 @@ export async function getPluginList() {
 		if (file.name.startsWith("Pod")) {
 			const tomlFile = path.join(dir, file.name, "plugin.toml");
 			const tomlText = await Deno.readTextFile(tomlFile);
-			const tomlObj = toml.parse(tomlText);
+			const tomlObj = util.validateSchema(
+				toml.parse(tomlText),
+				schemaPluginToml
+			);
 
-			// TODO: error handling
 			plugins.push({ name: file.name, type: tomlObj.type });
 		}
 	}

@@ -1,7 +1,8 @@
 import { fs, path } from "@src/mod.ts";
+import { schemaPodsJson } from "@src/util/schemas.ts";
 import * as util from "@src/util/util.ts";
 import * as utilsPod from "@src/util/utilsPod.ts";
-import * as utilsPlugins from "@src/util/utilsPlugins.ts";
+import * as utilsPlugin from "@src/util/utilsPlugin.ts";
 
 import * as schema from "@common/schemaV2.ts";
 
@@ -20,7 +21,7 @@ export async function podAdd(
 
 	await Deno.mkdir(dir, { recursive: true });
 
-	const { onCreate } = utilsPlugins.getPodHooks(dir, type);
+	const { onCreate } = await utilsPlugin.getPodHooks(dir, type);
 	await onCreate(dir);
 
 	if (!metafileJson.pods) {
@@ -49,7 +50,7 @@ export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
 		throw new Error("should not be undefined or empty");
 	}
 
-	const { onRemove } = utilsPlugins.getPodHooks(dir, type);
+	const { onRemove } = await utilsPlugin.getPodHooks(dir, type);
 	await onRemove(dir);
 	await Deno.remove(dir, { recursive: true });
 
@@ -65,11 +66,15 @@ export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
 }
 
 export async function podList(type: string): Promise<schema.podList_resT> {
-	const metafile = util.getPodMetafile();
-	const data = JSON.parse(await Deno.readTextFile(metafile));
+	const filename = util.getPodMetafile();
+	const text = await Deno.readTextFile(filename);
+	const json = util.validateSchema<typeof schemaPodsJson>(
+		JSON.parse(text),
+		schemaPodsJson
+	);
 
 	const pods: schema.podList_resT["pods"] = [];
-	for (const [uuid, obj] of Object.entries(data.pods)) {
+	for (const [uuid, obj] of Object.entries(json.pods)) {
 		if (obj.type == type) {
 			pods.push({
 				uuid,
@@ -83,7 +88,7 @@ export async function podList(type: string): Promise<schema.podList_resT> {
 }
 
 export async function podListPlugins(): Promise<schema.podListPlugins_resT> {
-	const plugins = await utilsPlugins.getPluginList();
+	const plugins = await utilsPlugin.getPluginList();
 
 	return {
 		plugins,

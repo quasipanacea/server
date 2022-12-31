@@ -59,13 +59,20 @@ export async function unwrap<T>(
 ): Promise<T> {
 	const body = await ctx.request.body({ type: "text" }).value;
 	const json = JSON.parse(body);
-	const result = schema.strict().safeParse(json);
+	validateSchema(json, schema);
 
+	return json;
+}
+
+export function validateSchema<Schema extends z.AnyZodObject>(
+	json: Record<string, unknown>,
+	schema: z.AnyZodObject
+): z.infer<Schema> {
+	const result = schema.strict().safeParse(json);
 	if (!result.success) {
 		throw new JSONError(result.error.format());
 	}
-
-	return json;
+	return result;
 }
 
 export class JSONError extends Error {
