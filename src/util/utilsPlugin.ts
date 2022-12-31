@@ -1,9 +1,8 @@
 import { path, Router, toml, colors, z } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
-import * as sendUtils from "@src/util/sendUtils.ts";
-import * as podUtils from "@src/util/podUtils.ts";
-
-import { Hooks, Endpoint } from "@common/util/types.ts";
+import { Hooks, Endpoint } from "@src/util/types.ts";
+import * as utilsSend from "@src/util/utilsSend.ts";
+import * as utilsPod from "@src/util/utilsPod.ts";
 
 export async function getPodHooks(dir: string, pluginType: string) {
 	const pluginName =
@@ -59,36 +58,52 @@ export async function loadPodRoutes(router: Router) {
 		};
 
 		const subrouter = new Router();
-		subrouter.get("/", sendUtils.success);
+		subrouter.get("/", utilsSend.success);
 
 		const module = await import(endpointFile);
 		for (const exprt in module) {
 			if (!Object.hasOwn(module, exprt)) continue;
-			if (exprt.endsWith("Schema")) continue;
 
 			const endpoint: Endpoint<typeof randomSchema> = module[exprt];
-			const endpointSchema = module[`${exprt}Schema`];
 
 			console.info(`/pod/plugin/${tomlObj.type}${endpoint.route}`);
 
 			subrouter.post(endpoint.route, async (ctx) => {
-				const data = await util.unwrap<z.infer<typeof endpointSchema["req"]>>(
+				const data = await util.unwrap<z.infer<typeof endpoint.schema["req"]>>(
 					ctx,
-					endpointSchema.req
+					endpoint.schema.req
 				);
 
 				// TODO: better checking
 				const pod = {
 					type: tomlObj.type as string,
 					uuid: data.uuid as string,
-					dir: podUtils.podFromUuid(data.uuid),
+					dir: utilsPod.podFromUuid(data.uuid),
 				};
 
 				const result = await endpoint.api(pod, data);
-				return sendUtils.json(ctx, result);
+				return utilsSend.json(ctx, result);
 			});
 
 			router.use(`/pod/plugin/${tomlObj.type}`, subrouter.routes());
 		}
 	}
+}
+
+export async function getPluginList() {
+	const plugins: { name: string; type: string }[] = [];
+
+	const dir = "./common/plugins/Core";
+	for await (const file of await Deno.readDir(dir)) {
+		if (file.name.startsWith("Pod")) {
+			const tomlFile = path.join(dir, file.name, "plugin.toml");
+			const tomlText = await Deno.readTextFile(tomlFile);
+			const tomlObj = toml.parse(tomlText);
+
+			// TODO: error handling
+			plugins.push({ name: file.name, type: tomlObj.type });
+		}
+	}
+
+	return plugins;
 }
