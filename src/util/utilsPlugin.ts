@@ -67,8 +67,12 @@ export async function loadPodRoutes(router: Router) {
 		const module = await import(endpointFile);
 		for (const exprt in module) {
 			if (!Object.hasOwn(module, exprt)) continue;
+			if (exprt == "getState") continue;
 
-			const endpoint: Endpoint<typeof randomSchema> = module[exprt];
+			const endpoint: Endpoint<
+				Record<string, unknown>,
+				typeof randomSchema
+			> = module[exprt];
 
 			console.info(`/pod/plugin/${tomlObj.type}${endpoint.route}`);
 
@@ -82,10 +86,11 @@ export async function loadPodRoutes(router: Router) {
 				const pod = {
 					type: tomlObj.type as string,
 					uuid: data.uuid as string,
-					dir: utilsPod.podFromUuid(data.uuid),
+					dir: utilsPod.getPodDirFromUuid(data.uuid),
 				};
 
-				const result = await endpoint.api(pod, data);
+				const state = module.getState(pod);
+				const result = await endpoint.api(pod, state, data);
 				return utilsSend.json(ctx, result);
 			});
 

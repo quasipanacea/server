@@ -12,6 +12,7 @@ export type Pod = {
 };
 
 export type Endpoint<
+	State,
 	Schema extends {
 		req: z.AnyZodObject;
 		res: z.AnyZodObject;
@@ -24,6 +25,7 @@ export type Endpoint<
 	};
 	api: (
 		pod: Pod,
-		data: z.infer<Schema["req"]>
+		state: State,
+		req: z.infer<Schema["req"]>
 	) => Promise<z.infer<Schema["res"]>> | z.infer<Schema["res"]>;
 };

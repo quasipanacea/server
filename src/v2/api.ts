@@ -14,7 +14,7 @@ export async function podAdd(
 	name: string
 ): Promise<schema.podAdd_resT> {
 	const uuid = crypto.randomUUID();
-	const dir = utilsPod.podFromUuid(uuid);
+	const dir = utilsPod.getPodDirFromUuid(uuid);
 
 	const metafilePath = util.getPodMetafile();
 	const metafileJson = JSON.parse(await Deno.readTextFile(metafilePath));
@@ -37,7 +37,7 @@ export async function podAdd(
 }
 
 export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
-	const dir = path.dirname(utilsPod.podFromUuid(uuid));
+	const dir = path.dirname(utilsPod.getPodDirFromUuid(uuid));
 
 	const metafilePath = util.getPodMetafile();
 	const metafileJson = JSON.parse(await Deno.readTextFile(metafilePath));

@@ -72,7 +72,7 @@ export function validateSchema<Schema extends z.AnyZodObject>(
 	if (!result.success) {
 		throw new JSONError(result.error.format());
 	}
-	return result;
+	return result.data;
 }
 
 export class JSONError extends Error {
