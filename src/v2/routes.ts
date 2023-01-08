@@ -1,4 +1,5 @@
 import { Router } from "@src/mod.ts";
+
 import * as utilsSend from "@src/util/utilsSend.ts";
 import * as utilsPlugin from "@src/util/utilsPlugin.ts";
 import * as unwrap from "@src/v2/unwrap.ts";
@@ -11,7 +12,7 @@ export const router = new Router();
 // Pod
 router.post("/pod/add", async (ctx) => {
 	const data = await unwrap.podAdd(ctx);
-	const result = await api.podAdd(data.type, data.name);
+	const result = await api.podAdd(data.handler, data.name);
 
 	return utilsSend.json(ctx, result);
 });
@@ -25,7 +26,7 @@ router.post("/pod/remove", async (ctx) => {
 
 router.post("/pod/list", async (ctx) => {
 	const data = await unwrap.podList(ctx);
-	const result = await api.podList(data.type);
+	const result = await api.podList(data.handler);
 
 	return utilsSend.json(ctx, result);
 });

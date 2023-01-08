@@ -1,7 +1,20 @@
-import { path, Context, z } from "@src/mod.ts";
+import { path, Context, z, toml } from "@src/mod.ts";
 import { config } from "@src/util/config.ts";
+import { SchemaPluginToml, SchemaPodsJson } from "../verify/schemas.ts";
 
-// flat
+export function jsonStringify(obj: Record<string, unknown>) {
+	return JSON.stringify(obj, null, "\t");
+}
+
+export function tomlStringify(obj: Record<string, unknown>) {
+	return toml.stringify(obj);
+}
+
+// misc
+export function getPluginsDir() {
+	return path.join(Deno.cwd(), "common/plugins");
+}
+
 export function getDataDir() {
 	return path.join(config.documentsDir, "data");
 }
@@ -10,8 +23,29 @@ export function getPodDir() {
 	return path.join(getDataDir(), "pods");
 }
 
-export function getPodMetafile() {
+export function getPodsJsonFile() {
 	return path.join(getDataDir(), "pods.json");
+}
+
+export async function getPodsJson() {
+	const file = getPodsJsonFile();
+	const text = await Deno.readTextFile(file);
+
+	return validateSchema<typeof SchemaPodsJson>(
+		JSON.parse(text),
+		SchemaPodsJson
+	);
+}
+
+export async function getPluginsToml(pluginName: string) {
+	return validateSchema<typeof SchemaPluginToml>(
+		toml.parse(
+			await Deno.readTextFile(
+				path.join(getPluginsDir(), "Core", pluginName, "plugin.toml")
+			)
+		),
+		SchemaPluginToml
+	);
 }
 
 // hier
@@ -65,10 +99,10 @@ export async function unwrap<T>(
 }
 
 export function validateSchema<Schema extends z.AnyZodObject>(
-	json: Record<string, unknown>,
+	obj: Record<string, unknown>,
 	schema: z.AnyZodObject
 ): z.infer<Schema> {
-	const result = schema.strict().safeParse(json);
+	const result = schema.strict().safeParse(obj);
 	if (!result.success) {
 		throw new JSONError(result.error.format());
 	}
@@ -76,11 +110,24 @@ export function validateSchema<Schema extends z.AnyZodObject>(
 }
 
 export class JSONError extends Error {
-	json: Record<string, unknown>;
+	obj: Record<string, unknown>;
 
-	constructor(json: Record<string, unknown>) {
-		super(`JSON Error: ${JSON.stringify(json, null, "\t")}`);
+	constructor(
+		obj: Record<string, unknown>,
+		serializationType: "json" | "toml" = "json"
+	) {
+		let str = "???";
+		switch (serializationType) {
+			case "json":
+				str = jsonStringify(obj);
+				break;
+			case "toml":
+				str = tomlStringify(obj);
+		}
+
+		super(`JSON Error: ${str}`);
+
 		this.name = this.constructor.name;
-		this.json = json;
+		this.obj = obj;
 	}
 }

@@ -1,119 +1,99 @@
 import { path, Router, toml, colors, z } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
-import { Hooks, Endpoint } from "@src/util/types.ts";
+import {
+	HooksModule,
+	Endpoint,
+	EndpointModule,
+	SharedModule,
+} from "@src/verify/types.ts";
+import { SchemaPluginToml } from "@src/verify/schemas.ts";
 import * as utilsSend from "@src/util/utilsSend.ts";
 import * as utilsPod from "@src/util/utilsPod.ts";
-import { schemaPluginToml } from "./schemas.ts";
 
-export async function getPodHooks(
-	dir: string,
-	pluginType: string
-): Promise<Hooks> {
-	const pluginName =
-		"Pod" + pluginType[0].toLocaleUpperCase() + pluginType.slice(1);
+function isPodPluginDirname(dirname: string) {
+	return dirname.startsWith("pod-");
+}
+
+export async function getPodHooks(handler: string): Promise<HooksModule> {
+	const hooksFile = path.join(
+		util.getPluginsDir(),
+		`Core/pod-${handler}/server-deno/hooks.ts`
+	);
 
 	try {
-		const { onCreate, onRemove } = (await import(
-			`../../../common/plugins/Core/${pluginName}/api.ts`
-		)) as Hooks;
+		const module = (await import(hooksFile)) as HooksModule;
+
+		const onPodCreate = module.onPodCreate || (() => {});
+		const onPodRemove = module.onPodRemove || (() => {});
 
 		return {
-			onCreate,
-			onRemove,
+			onPodCreate,
+			onPodRemove,
 		};
 	} catch {
-		await Deno.remove(path.dirname(dir), { recursive: true });
-		throw new Error(`PluginPod ${pluginName} not found`);
+		throw new Error(`Failed to import hooks for plugin: ${handler}`);
 	}
 }
 
 export async function loadPodRoutes(router: Router) {
-	const parentDir = "./common/plugins/Core";
-	for await (const podDir of await Deno.readDir(parentDir)) {
-		if (!podDir.name.startsWith("Pod")) continue;
+	const coreDir = path.join(util.getPluginsDir(), "Core");
+	for await (const podDir of await Deno.readDir(coreDir)) {
+		if (!isPodPluginDirname(podDir.name)) continue;
 
 		console.info(`${colors.bold("Loading:")} ${podDir.name}`);
 
-		const tomlFile = path.join(
-			Deno.cwd(),
-			parentDir,
-			podDir.name,
-			"plugin.toml"
-		);
-		const endpointFile = path.join(
-			Deno.cwd(),
-			parentDir,
-			podDir.name,
-			"server-deno/endpoints.ts"
-		);
+		const pluginToml = await util.getPluginsToml(podDir.name);
 
-		const tomlText = await Deno.readTextFile(tomlFile);
-		const tomlObj = toml.parse(tomlText);
-		if (!tomlObj.type) {
-			console.warn(
-				`Skipping plugin ${podDir.name} because its missing a 'type' property from its 'plugin.toml'`
-			);
-			continue;
-		}
+		const endpointModule = (await import(
+			path.join(coreDir, podDir.name, "server-deno/endpoints.ts")
+		)) as EndpointModule;
 
-		const randomSchema = {
-			req: z.object({}),
-			res: z.object({}),
-		};
+		const sharedModule = (await import(
+			path.join(coreDir, podDir.name, "server-deno/shared.ts")
+		)) as SharedModule;
 
 		const subrouter = new Router();
 		subrouter.get("/", utilsSend.success);
 
-		const module = await import(endpointFile);
-		for (const exprt in module) {
-			if (!Object.hasOwn(module, exprt)) continue;
-			if (exprt == "getState") continue;
+		for (const exprt in endpointModule) {
+			if (!Object.hasOwn(endpointModule, exprt)) continue;
 
-			const endpoint: Endpoint<
-				Record<string, unknown>,
-				typeof randomSchema
-			> = module[exprt];
+			const endpoint = endpointModule[exprt];
 
-			console.info(`/pod/plugin/${tomlObj.type}${endpoint.route}`);
+			console.info(`/pod/plugin/${pluginToml.name}${endpoint.route}`);
 
 			subrouter.post(endpoint.route, async (ctx) => {
-				const data = await util.unwrap<z.infer<typeof endpoint.schema["req"]>>(
-					ctx,
-					endpoint.schema.req
-				);
+				const data = await util.unwrap<{
+					uuid?: string;
+					[key: string]: unknown;
+				}>(ctx, endpoint.schema.req);
 
-				// TODO: better checking
-				const pod = {
-					type: tomlObj.type as string,
-					uuid: data.uuid as string,
-					dir: utilsPod.getPodDirFromUuid(data.uuid),
-				};
+				if (!data.uuid) {
+					throw new Error("Request must have 'uuid'");
+				}
 
-				const state = module.getState(pod);
+				const pod = await utilsPod.getPod(data.uuid, pluginToml.name);
+				const state = sharedModule.makeState(pod);
+
 				const result = await endpoint.api(pod, state, data);
 				return utilsSend.json(ctx, result);
 			});
 
-			router.use(`/pod/plugin/${tomlObj.type}`, subrouter.routes());
+			router.use(`/pod/plugin/${pluginToml.name}`, subrouter.routes());
 		}
 	}
 }
 
 export async function getPluginList() {
-	const plugins: { name: string; type: string }[] = [];
+	const plugins: { name: string; namePretty: string }[] = [];
 
-	const dir = "./common/plugins/Core";
-	for await (const file of await Deno.readDir(dir)) {
-		if (file.name.startsWith("Pod")) {
-			const tomlFile = path.join(dir, file.name, "plugin.toml");
-			const tomlText = await Deno.readTextFile(tomlFile);
-			const tomlObj = util.validateSchema(
-				toml.parse(tomlText),
-				schemaPluginToml
-			);
+	const coreDir = path.join(util.getPluginsDir(), "Core");
+	for await (const file of await Deno.readDir(coreDir)) {
+		if (!isPodPluginDirname(file.name)) continue;
 
-			plugins.push({ name: file.name, type: tomlObj.type });
-		}
+		const pluginToml = await util.getPluginsToml(file.name);
+
+		plugins.push({ name: pluginToml.name, namePretty: pluginToml.name });
 	}
 
 	return plugins;

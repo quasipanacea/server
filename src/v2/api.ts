@@ -1,5 +1,6 @@
 import { fs, path } from "@src/mod.ts";
-import { schemaPodsJson } from "@src/util/schemas.ts";
+
+import { SchemaPodsJson } from "@src/verify/schemas.ts";
 import * as util from "@src/util/util.ts";
 import * as utilsPod from "@src/util/utilsPod.ts";
 import * as utilsPlugin from "@src/util/utilsPlugin.ts";
@@ -10,75 +11,59 @@ import * as schema from "@common/schemaV2.ts";
 //
 // Pod
 export async function podAdd(
-	type: string,
+	handler: string,
 	name: string
 ): Promise<schema.podAdd_resT> {
 	const uuid = crypto.randomUUID();
-	const dir = utilsPod.getPodDirFromUuid(uuid);
+	const pod = await utilsPod.getPod(uuid);
+	const podsJson = await util.getPodsJson();
 
-	const metafilePath = util.getPodMetafile();
-	const metafileJson = JSON.parse(await Deno.readTextFile(metafilePath));
-
-	await Deno.mkdir(dir, { recursive: true });
-
-	const { onCreate } = await utilsPlugin.getPodHooks(dir, type);
-	await onCreate(dir);
-
-	if (!metafileJson.pods) {
-		metafileJson.pods = {};
-	}
-	metafileJson.pods[uuid] = { type, name };
+	// work
+	podsJson.pods[uuid] = { handler, name };
 	await Deno.writeTextFile(
-		metafilePath,
-		JSON.stringify(metafileJson, null, "\t")
+		util.getPodsJsonFile(),
+		util.jsonStringify(podsJson)
 	);
+	await Deno.mkdir(pod.dir, { recursive: true });
+
+	// hook
+	const { onPodCreate } = await utilsPlugin.getPodHooks(handler);
+	await onPodCreate(pod);
 
 	return {};
 }
 
 export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
-	const dir = path.dirname(utilsPod.getPodDirFromUuid(uuid));
+	const pod = await utilsPod.getPod(uuid);
+	const podsJson = await util.getPodsJson();
+	const handler = podsJson.pods[uuid].handler;
 
-	const metafilePath = util.getPodMetafile();
-	const metafileJson = JSON.parse(await Deno.readTextFile(metafilePath));
+	// hook
+	const { onPodRemove } = await utilsPlugin.getPodHooks(handler);
+	await onPodRemove(pod);
 
-	if (!metafileJson.pods) {
-		metafileJson.pods = {};
-	}
-	const type = metafileJson.pods[uuid].type;
-	if (!type) {
-		throw new Error("should not be undefined or empty");
-	}
-
-	const { onRemove } = await utilsPlugin.getPodHooks(dir, type);
-	await onRemove(dir);
-	await Deno.remove(dir, { recursive: true });
-
-	if (metafileJson.pods[uuid]) {
-		delete metafileJson.pods[uuid];
+	// work
+	await Deno.remove(pod.rootDir, { recursive: true });
+	if (podsJson.pods[uuid]) {
+		delete podsJson.pods[uuid];
 	}
 	await Deno.writeTextFile(
-		metafilePath,
-		JSON.stringify(metafileJson, null, "\t")
+		util.getPodsJsonFile(),
+		util.jsonStringify(podsJson)
 	);
 
 	return {};
 }
 
 export async function podList(type: string): Promise<schema.podList_resT> {
-	const filename = util.getPodMetafile();
-	const text = await Deno.readTextFile(filename);
-	const json = util.validateSchema<typeof schemaPodsJson>(
-		JSON.parse(text),
-		schemaPodsJson
-	);
+	const podsJson = await util.getPodsJson();
 
 	const pods: schema.podList_resT["pods"] = [];
-	for (const [uuid, obj] of Object.entries(json.pods)) {
-		if (obj.type == type) {
+	for (const [uuid, obj] of Object.entries(podsJson.pods)) {
+		if (obj.handler == type) {
 			pods.push({
 				uuid,
-				type: obj.type,
+				handler: obj.handler,
 				name: obj.name,
 			});
 		}
@@ -96,13 +81,13 @@ export async function podListPlugins(): Promise<schema.podListPlugins_resT> {
 }
 
 export async function podQuery(uuid: string): Promise<schema.podQuery_resT> {
-	const podsDatafile = util.getPodMetafile();
+	const podsDatafile = util.getPodsJsonFile();
 	const podsJson = JSON.parse(await Deno.readTextFile(podsDatafile));
 
 	if (podsJson?.pods?.[uuid]) {
 		return podsJson.pods[uuid];
 	} else {
-		return { type: "", name: "" };
+		return { handler: "", name: "" };
 	}
 }
 
