@@ -1,4 +1,4 @@
-import { Context, Status, send } from "@src/mod.ts";
+import { Context, Status, send, path } from "@src/mod.ts";
 
 import { JSONError } from "@src/util/util.ts";
 
@@ -45,6 +45,6 @@ export async function handleStaticserve(ctx: Context, next: Next) {
 	}
 
 	await send(ctx, pathname.slice("/public".length), {
-		root: "./public",
+		root: path.join(Deno.cwd(), "./public"),
 	});
 }

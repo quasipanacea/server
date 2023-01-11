@@ -15,7 +15,7 @@ export async function podAdd(
 	name: string
 ): Promise<schema.podAdd_resT> {
 	const uuid = crypto.randomUUID();
-	const pod = await utilsPod.getPod(uuid);
+	const pod = await utilsPod.getPod(uuid, handler);
 	const podsJson = await util.getPodsJson();
 
 	// work
