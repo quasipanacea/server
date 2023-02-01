@@ -2,6 +2,7 @@ import { Application, Router } from "@src/mod.ts";
 
 import { init } from "@src/init.ts";
 import { router as routesV2 } from "@src/v2/routes.ts";
+import { router as routesV3 } from "@src/v3/routes.ts";
 import {
 	handleErrors,
 	handleLogs,
@@ -14,7 +15,9 @@ app.use(handleLogs);
 app.use(handleStaticserve);
 
 const router = new Router();
+
 router.use("/api/v2", routesV2.routes());
+router.use("/api/v3", routesV3.routes());
 app.use(router.routes());
 app.use(router.allowedMethods());
 

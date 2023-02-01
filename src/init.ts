@@ -1,8 +1,8 @@
-import { path, z } from "./mod.ts";
+import { path } from "./mod.ts";
 import * as util from "@src/util/util.ts";
-import * as utilsPod from "@src/util/utilsPod.ts";
+import * as utilPod from "@src/util/utilPod.ts";
 
-import { SchemaPodsJson } from "@src/verify/schemas.ts";
+import { ResourceSchemaPods } from "@src/verify/schemas.ts";
 
 export async function init() {
 	const dir = await util.getDefaultDir();
@@ -24,15 +24,15 @@ export async function init() {
 
 	// Ensure a one to one correspondence from pod.json to directory structure
 	{
-		const obj = util.validateSchema<typeof SchemaPodsJson>(
+		const obj = util.validateSchema<typeof ResourceSchemaPods>(
 			JSON.parse(await Deno.readTextFile(podMetafile)),
-			SchemaPodsJson
+			ResourceSchemaPods
 		);
 		if (obj.pods) {
 			for (const uuid in obj.pods) {
 				if (!Object.hasOwn(obj.pods, uuid)) continue;
 
-				const filepath = utilsPod.getPodDirFromUuid(uuid);
+				const filepath = utilPod.getPodDirFromUuid(uuid);
 				try {
 					await Deno.stat(filepath);
 
@@ -60,9 +60,9 @@ export async function init() {
 
 	// Ensure a one to one correspondence from directory to pod.json
 	{
-		const obj = util.validateSchema<typeof SchemaPodsJson>(
+		const obj = util.validateSchema<typeof ResourceSchemaPods>(
 			JSON.parse(await Deno.readTextFile(podMetafile)),
-			SchemaPodsJson
+			ResourceSchemaPods
 		);
 		const podDir = util.getPodDir();
 		for await (const dir of await Deno.readDir(podDir)) {

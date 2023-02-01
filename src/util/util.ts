@@ -1,6 +1,8 @@
 import { path, Context, z, toml } from "@src/mod.ts";
+
 import { config } from "@src/util/config.ts";
-import { SchemaPluginToml, SchemaPodsJson } from "../verify/schemas.ts";
+
+import { ResourceSchemaPods } from "../verify/schemas.ts";
 
 export function jsonStringify(obj: Record<string, unknown>) {
 	return JSON.stringify(obj, null, "\t");
@@ -11,8 +13,8 @@ export function tomlStringify(obj: Record<string, unknown>) {
 }
 
 // misc
-export function getPluginsDir() {
-	return path.join(Deno.cwd(), "common/plugins");
+export function getPacksDir() {
+	return path.join(Deno.cwd(), "common/packs");
 }
 
 export function getDataDir() {
@@ -31,20 +33,9 @@ export async function getPodsJson() {
 	const file = getPodsJsonFile();
 	const text = await Deno.readTextFile(file);
 
-	return validateSchema<typeof SchemaPodsJson>(
+	return validateSchema<typeof ResourceSchemaPods>(
 		JSON.parse(text),
-		SchemaPodsJson
-	);
-}
-
-export async function getPluginsToml(pluginName: string) {
-	return validateSchema<typeof SchemaPluginToml>(
-		toml.parse(
-			await Deno.readTextFile(
-				path.join(getPluginsDir(), "Core", pluginName, "plugin.toml")
-			)
-		),
-		SchemaPluginToml
+		ResourceSchemaPods
 	);
 }
 

@@ -1,4 +1,4 @@
-import { z } from "@src/mod.ts";
+import { z, Context } from "@src/mod.ts";
 
 // TYPES
 
@@ -36,6 +36,27 @@ export type EndpointModule = {
 		unknown,
 		{ req: z.AnyZodObject; res: z.AnyZodObject }
 	>;
+};
+
+export type InternalEndpoint<
+	Schema extends {
+		req: z.AnyZodObject;
+		res: z.AnyZodObject;
+	}
+> = {
+	route: string;
+	schema: {
+		req: z.AnyZodObject;
+		res: z.AnyZodObject;
+	};
+	api: (
+		ctx: Context,
+		data: z.infer<Schema["req"]>
+	) => Promise<z.infer<Schema["res"]>> | z.infer<Schema["res"]>;
+};
+
+export type InternalEndpointModule = {
+	[key: string]: InternalEndpoint<{ req: z.AnyZodObject; res: z.AnyZodObject }>;
 };
 
 // hooks.ts

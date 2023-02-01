@@ -1,9 +1,8 @@
 import { fs, path } from "@src/mod.ts";
 
-import { SchemaPodsJson } from "@src/verify/schemas.ts";
 import * as util from "@src/util/util.ts";
-import * as utilsPod from "@src/util/utilsPod.ts";
-import * as utilsPlugin from "@src/util/utilsPlugin.ts";
+import * as utilPod from "@src/util/utilPod.ts";
+import * as utilPlugin from "@src/util/utilPlugin.ts";
 
 import * as schema from "@common/schemaV2.ts";
 
@@ -15,7 +14,7 @@ export async function podAdd(
 	name: string
 ): Promise<schema.podAdd_resT> {
 	const uuid = crypto.randomUUID();
-	const pod = await utilsPod.getPod(uuid, handler);
+	const pod = await utilPod.getPod(uuid, handler);
 	const podsJson = await util.getPodsJson();
 
 	// work
@@ -27,19 +26,19 @@ export async function podAdd(
 	await Deno.mkdir(pod.dir, { recursive: true });
 
 	// hook
-	const { onPodCreate } = await utilsPlugin.getPodHooks(handler);
+	const { onPodCreate } = await utilPlugin.getPodHooks(handler);
 	await onPodCreate(pod);
 
 	return {};
 }
 
 export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
-	const pod = await utilsPod.getPod(uuid);
+	const pod = await utilPod.getPod(uuid);
 	const podsJson = await util.getPodsJson();
 	const handler = podsJson.pods[uuid].handler;
 
 	// hook
-	const { onPodRemove } = await utilsPlugin.getPodHooks(handler);
+	const { onPodRemove } = await utilPlugin.getPodHooks(handler);
 	await onPodRemove(pod);
 
 	// work
@@ -73,7 +72,15 @@ export async function podList(type: string): Promise<schema.podList_resT> {
 }
 
 export async function podListPlugins(): Promise<schema.podListPlugins_resT> {
-	const plugins = await utilsPlugin.getPluginList();
+	const plugins: { name: string; namePretty: string }[] = [];
+
+	for (const plugin of await utilPlugin.getPluginList()) {
+		if (plugin.name !== "pod") {
+			const pluginToml = await utilPlugin.getPluginsToml(plugin.dir);
+
+			plugins.push({ name: pluginToml.name, namePretty: pluginToml.name });
+		}
+	}
 
 	return {
 		plugins,
