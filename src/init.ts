@@ -1,6 +1,7 @@
-import { path } from "./mod.ts";
+import { path, fs } from "./mod.ts";
 import * as util from "@src/util/util.ts";
 import * as utilPod from "@src/util/utilPod.ts";
+import * as utilPlugin from "@src/util/utilPlugin.ts";
 
 import { ResourceSchemaPods } from "@src/verify/schemas.ts";
 
@@ -83,6 +84,29 @@ export async function init() {
 					}
 				}
 			}
+		}
+	}
+
+	// Create symlinks so frontned works
+	const packsDir = util.getPacksDir();
+	const symlinksDir = path.join(packsDir, "../symlinks");
+	for await (const dirname of await Deno.readDir(symlinksDir)) {
+		const dir = path.join(symlinksDir, dirname.name);
+
+		for await (const symlink of await Deno.readDir(dir)) {
+			const file = path.join(dir, symlink.name);
+			await Deno.remove(file);
+
+			console.log(`Removed ${file}`);
+		}
+	}
+	for await (const entry of fs.walk(packsDir)) {
+		if (entry.name.startsWith("Overview")) {
+			const symlink = path.join(symlinksDir, "overviews", entry.name);
+			await Deno.symlink(entry.path, symlink);
+		} else if (entry.name.startsWith("Pod")) {
+			const symlink = path.join(symlinksDir, "pods", entry.name);
+			await Deno.symlink(entry.path, symlink);
 		}
 	}
 }
