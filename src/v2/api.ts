@@ -14,7 +14,7 @@ export async function podAdd(
 	name: string
 ): Promise<schema.podAdd_resT> {
 	const uuid = crypto.randomUUID();
-	const pod = await utilPod.getPod(uuid, handler);
+	const pod = await util.getPod(uuid, handler);
 	const podsJson = await util.getPodsJson();
 
 	// work
@@ -33,7 +33,7 @@ export async function podAdd(
 }
 
 export async function podRemove(uuid: string): Promise<schema.podRemove_resT> {
-	const pod = await utilPod.getPod(uuid);
+	const pod = await util.getPod(uuid);
 	const podsJson = await util.getPodsJson();
 	const handler = podsJson.pods[uuid].handler;
 

@@ -7,7 +7,6 @@ import {
 } from "@src/verify/types.ts";
 import { SchemaPluginToml } from "@src/verify/schemas.ts";
 import * as utilSend from "@src/util/utilSend.ts";
-import * as utilPod from "@src/util/utilPod.ts";
 
 export async function getPodHooks(handler: string): Promise<HooksModule> {
 	let hooksFile = null;
@@ -72,7 +71,7 @@ export async function loadPodRoutes(router: Router) {
 					throw new Error("Request must have 'uuid'");
 				}
 
-				const pod = await utilPod.getPod(data.uuid, pluginToml.name);
+				const pod = await util.getPod(data.uuid, pluginToml.name);
 				const state = sharedModule.makeState(pod);
 
 				const result = await endpoint.api(pod, state, data);
@@ -82,6 +81,12 @@ export async function loadPodRoutes(router: Router) {
 			router.use(`/pod/plugin/${pluginToml.name}`, subrouter.routes());
 		}
 	}
+}
+
+type Pack = {};
+
+export async function getPackList(): Promise<Pack[]> {
+	return [""];
 }
 
 type Plugin = {
@@ -98,28 +103,65 @@ export async function getPluginList(): Promise<Plugin[]> {
 	const packsDir = path.join(util.getPacksDir());
 	for await (const packEntry of await Deno.readDir(packsDir)) {
 		const packDir = path.join(packsDir, packEntry.name);
-
-		if (packEntry.isFile || packEntry.isSymlink) {
+		if (!packEntry.isDirectory) {
 			console.warn(`Skipping: ${packDir}`);
 			continue;
 		}
 
-		for await (const pluginEntry of await Deno.readDir(packDir)) {
-			const pluginDir = path.join(packDir, pluginEntry.name);
+		let packToml;
+		try {
+			const text = await Deno.readTextFile(path.join(packDir, "pack.toml"));
+			packToml = toml.parse(text);
+		} catch (err: unknown) {
+			if (err instanceof Deno.errors.NotFound) {
+				packToml = {};
+			} else {
+				throw err;
+			}
+		}
 
-			if (pluginEntry.isFile || pluginEntry.isSymlink) {
-				console.warn(`Skipping: ${pluginDir}`);
+		for await (const resourceEntry of await Deno.readDir(packDir)) {
+			const resourceDir = path.join(packDir, resourceEntry.name);
+			if (!resourceEntry.isDirectory) {
+				console.warn(`Skipping: ${resourceDir}`);
 				continue;
 			}
 
-			const pluginConf = await getPluginsToml(pluginDir);
-			plugins.push({
-				name: pluginConf.name,
-				namePretty: pluginConf.namePretty,
-				resource: pluginEntry.name.split("-")[0],
-				dir: pluginDir,
-				fromPack: packEntry.name,
-			});
+			for await (const pluginEntry of await Deno.readDir(resourceDir)) {
+				const pluginDir = path.join(resourceDir, pluginEntry.name);
+				if (!pluginEntry.isDirectory) {
+					console.warn(`Skipping: ${pluginDir}`);
+					continue;
+				}
+
+				let pluginConf;
+				try {
+					pluginConf = await getPluginsToml(pluginDir);
+				} catch (err) {
+					if (err instanceof Deno.errors.NotFound) {
+						pluginConf = {};
+					} else {
+						throw err;
+					}
+				}
+
+				for await (const partEntry of await Deno.readDir(pluginDir)) {
+					const partDir = path.join(pluginDir, partEntry.name);
+					if (!partEntry.isDirectory) {
+						console.warn(`Skipping: ${partDir}`);
+						continue;
+					}
+
+					plugins.push({
+						name: pluginConf.name,
+						namePretty: pluginConf.namePretty,
+						resource: pluginEntry.name.split("-")[0],
+						dir: pluginDir,
+						packConfig: packEntry.name,
+						config: pluginConf,
+					});
+				}
+			}
 		}
 	}
 

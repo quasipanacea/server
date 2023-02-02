@@ -7,8 +7,6 @@ import * as api from "@src/v2/api.ts";
 
 export const router = new Router();
 
-await utilPlugin.loadPodRoutes(router);
-
 //
 //
 // Pod

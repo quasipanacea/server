@@ -2,29 +2,50 @@ import { path, fs } from "./mod.ts";
 import * as util from "@src/util/util.ts";
 import * as utilPod from "@src/util/utilPod.ts";
 import * as utilPlugin from "@src/util/utilPlugin.ts";
+import * as utilResource from "@src/util/utilResource.ts";
 
 import { ResourceSchemaPods } from "@src/verify/schemas.ts";
 
 export async function init() {
-	const dir = await util.getDefaultDir();
-	await Deno.mkdir(dir, { recursive: true });
+	// const dir = await util.getDefaultDir();
+	// await Deno.mkdir(dir, { recursive: true });
 
-	const dataDir = await util.getDataDir();
-	await Deno.mkdir(dataDir, { recursive: true });
+	// const dataDir = await util.getDataDir();
+	// await Deno.mkdir(dataDir, { recursive: true });
 
-	const podMetafile = util.getPodsJsonFile();
-	try {
-		const f = await Deno.open(podMetafile, { createNew: true, write: true });
-		f.write(new TextEncoder().encode('{ "pods": {} }'));
-		f.close();
-	} catch (err: unknown) {
-		if (!(err instanceof Deno.errors.AlreadyExists)) {
-			throw err;
+	// Create symlinks so Vite can perform dynamic import
+	{
+		const packsDir = util.getPacksDir();
+		const symlinksDir = path.join(packsDir, "../resource-symlinks");
+		console.log("foooo");
+		for await (const resource of await Deno.readDir(symlinksDir)) {
+			const resourceDir = path.join(symlinksDir, resource.name);
+
+			for await (const part of await Deno.readDir(resourceDir)) {
+				const partFile = path.join(resourceDir, part.name);
+				await Deno.remove(partFile);
+
+				console.log(`Removed ${partFile}`);
+			}
+		}
+		for await (const entry of fs.walk(packsDir)) {
+			console.log(entry);
+
+			if (entry.name.startsWith("Overview") && entry.name.endsWith(".vue")) {
+				const symlink = path.join(symlinksDir, "overviews", entry.name);
+				await Deno.mkdir(path.dirname(symlink), { recursive: true });
+				await Deno.symlink(entry.path, symlink);
+			} else if (entry.name.startsWith("Pod") && entry.name.endsWith(".vue")) {
+				const symlink = path.join(symlinksDir, "pods", entry.name);
+				await Deno.mkdir(path.dirname(symlink), { recursive: true });
+				await Deno.symlink(entry.path, symlink);
+			}
 		}
 	}
 
 	// Ensure a one to one correspondence from pod.json to directory structure
 	{
+		const podMetafile = util.getPodsJsonFile();
 		const obj = util.validateSchema<typeof ResourceSchemaPods>(
 			JSON.parse(await Deno.readTextFile(podMetafile)),
 			ResourceSchemaPods
@@ -33,7 +54,7 @@ export async function init() {
 			for (const uuid in obj.pods) {
 				if (!Object.hasOwn(obj.pods, uuid)) continue;
 
-				const filepath = utilPod.getPodDirFromUuid(uuid);
+				const filepath = utilResource.getResourceDir("pods", uuid);
 				try {
 					await Deno.stat(filepath);
 
@@ -61,6 +82,7 @@ export async function init() {
 
 	// Ensure a one to one correspondence from directory to pod.json
 	{
+		const podMetafile = util.getPodsJsonFile();
 		const obj = util.validateSchema<typeof ResourceSchemaPods>(
 			JSON.parse(await Deno.readTextFile(podMetafile)),
 			ResourceSchemaPods
@@ -84,29 +106,6 @@ export async function init() {
 					}
 				}
 			}
-		}
-	}
-
-	// Create symlinks so frontned works
-	const packsDir = util.getPacksDir();
-	const symlinksDir = path.join(packsDir, "../symlinks");
-	for await (const dirname of await Deno.readDir(symlinksDir)) {
-		const dir = path.join(symlinksDir, dirname.name);
-
-		for await (const symlink of await Deno.readDir(dir)) {
-			const file = path.join(dir, symlink.name);
-			await Deno.remove(file);
-
-			console.log(`Removed ${file}`);
-		}
-	}
-	for await (const entry of fs.walk(packsDir)) {
-		if (entry.name.startsWith("Overview")) {
-			const symlink = path.join(symlinksDir, "overviews", entry.name);
-			await Deno.symlink(entry.path, symlink);
-		} else if (entry.name.startsWith("Pod")) {
-			const symlink = path.join(symlinksDir, "pods", entry.name);
-			await Deno.symlink(entry.path, symlink);
 		}
 	}
 }

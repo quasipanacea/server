@@ -1,6 +1,9 @@
 import { path, Context, z, toml } from "@src/mod.ts";
 
 import { config } from "@src/util/config.ts";
+import * as util from "@src/util/util.ts";
+import * as utilResource from "@src/util/utilResource.ts";
+import { Pod } from "@src/verify/types.ts";
 
 import { ResourceSchemaPods } from "../verify/schemas.ts";
 
@@ -145,4 +148,21 @@ export async function run_bg(args: string[]) {
 		throw new Error("Failed to spawn background process:" + stdout + stderr);
 	}
 	p.close();
+}
+
+export async function getPod(uuid: string, handler?: string): Promise<Pod> {
+	const dir = utilResource.getResourceDir("pods", uuid);
+	const rootDir = path.dirname(dir);
+
+	if (!handler) {
+		const podsJson = await util.getPodsJson();
+		handler = podsJson.pods[uuid].handler;
+	}
+
+	return {
+		handler,
+		uuid,
+		dir,
+		rootDir,
+	};
 }

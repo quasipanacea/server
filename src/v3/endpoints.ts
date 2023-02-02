@@ -12,6 +12,12 @@ const handler_t = z.string().min(1);
 
 // COLLECTIONS
 
+export type addCollectionSchema_requestT = z.infer<
+	(typeof addCollectionSchema)["req"]
+>;
+export type addCollectionSchema_responseT = z.infer<
+	(typeof addCollectionSchema)["res"]
+>;
 export const addCollectionSchema = {
 	req: z.object({ name: name_t, handler: z.string().min(1) }),
 	res: z.object({ uuid: uuid_t }),
@@ -91,7 +97,7 @@ export const listCollection: InternalEndpoint<typeof listCollectionSchema> = {
 
 		// work
 		const collections: z.infer<
-			typeof listCollectionSchema["res"]
+			(typeof listCollectionSchema)["res"]
 		>["collections"] = [];
 		for (const [uuid, obj] of Object.entries(rJson.collections)) {
 			collections.push({
@@ -183,7 +189,7 @@ export const listPod: InternalEndpoint<typeof listPodSchema> = {
 			typeof schemas.ResourceSchemaPods
 		>("pods", schemas.ResourceSchemaPods);
 
-		const pods: z.infer<typeof listPodSchema["res"]>["pods"] = [];
+		const pods: z.infer<(typeof listPodSchema)["res"]>["pods"] = [];
 		for (const [uuid, obj] of Object.entries(rJson.pods)) {
 			pods.push({
 				uuid,
@@ -198,6 +204,12 @@ export const listPod: InternalEndpoint<typeof listPodSchema> = {
 
 // PLUGINS
 
+export type listPluginsSchema_requestT = z.infer<
+	(typeof listPluginsSchema)["req"]
+>;
+export type listPluginsSchema_responseT = z.infer<
+	(typeof listPluginsSchema)["res"]
+>;
 export const listPluginsSchema = {
 	req: z.object({}),
 	res: z.object({
