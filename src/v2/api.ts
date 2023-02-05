@@ -1,7 +1,6 @@
 import { fs, path } from "@src/mod.ts";
 
 import * as util from "@src/util/util.ts";
-import * as utilPod from "@src/util/utilPod.ts";
 import * as utilPlugin from "@src/util/utilPlugin.ts";
 
 import * as schema from "@common/schemaV2.ts";
@@ -75,10 +74,8 @@ export async function podListPlugins(): Promise<schema.podListPlugins_resT> {
 	const plugins: { name: string; namePretty: string }[] = [];
 
 	for (const plugin of await utilPlugin.getPluginList()) {
-		if (plugin.name !== "pod") {
-			const pluginToml = await utilPlugin.getPluginsToml(plugin.dir);
-
-			plugins.push({ name: pluginToml.name, namePretty: pluginToml.name });
+		if (plugin.resource === "pod") {
+			plugins.push({ name: plugin.name, namePretty: plugin.name });
 		}
 	}
 

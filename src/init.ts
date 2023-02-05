@@ -1,36 +1,30 @@
 import { path, fs } from "./mod.ts";
 import * as util from "@src/util/util.ts";
-import * as utilPod from "@src/util/utilPod.ts";
-import * as utilPlugin from "@src/util/utilPlugin.ts";
 import * as utilResource from "@src/util/utilResource.ts";
 
 import { ResourceSchemaPods } from "@src/verify/schemas.ts";
 
 export async function init() {
-	// const dir = await util.getDefaultDir();
-	// await Deno.mkdir(dir, { recursive: true });
+	const defaultDir = await util.getDefaultDir();
+	await Deno.mkdir(defaultDir, { recursive: true });
 
-	// const dataDir = await util.getDataDir();
-	// await Deno.mkdir(dataDir, { recursive: true });
+	const dataDir = await util.getDataDir();
+	await Deno.mkdir(dataDir, { recursive: true });
 
 	// Create symlinks so Vite can perform dynamic import
 	{
 		const packsDir = util.getPacksDir();
 		const symlinksDir = path.join(packsDir, "../resource-symlinks");
-		console.log("foooo");
-		for await (const resource of await Deno.readDir(symlinksDir)) {
-			const resourceDir = path.join(symlinksDir, resource.name);
+
+		for await (const resourceEntry of await Deno.readDir(symlinksDir)) {
+			const resourceDir = path.join(symlinksDir, resourceEntry.name);
 
 			for await (const part of await Deno.readDir(resourceDir)) {
 				const partFile = path.join(resourceDir, part.name);
 				await Deno.remove(partFile);
-
-				console.log(`Removed ${partFile}`);
 			}
 		}
 		for await (const entry of fs.walk(packsDir)) {
-			console.log(entry);
-
 			if (entry.name.startsWith("Overview") && entry.name.endsWith(".vue")) {
 				const symlink = path.join(symlinksDir, "overviews", entry.name);
 				await Deno.mkdir(path.dirname(symlink), { recursive: true });

@@ -1,12 +1,15 @@
 import { path, Router, toml, colors } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
-import {
-	HooksModule,
-	EndpointModule,
-	SharedModule,
-} from "@src/verify/types.ts";
+import { PluginModule } from "@src/verify/types.ts";
 import { SchemaPluginToml } from "@src/verify/schemas.ts";
 import * as utilSend from "@src/util/utilSend.ts";
+
+// export async function getPluginsToml(pluginDir: string) {
+// 	return util.validateSchema<typeof SchemaPluginToml>(
+// 		toml.parse(await Deno.readTextFile(path.join(pluginDir, "plugin.toml"))),
+// 		SchemaPluginToml
+// 	);
+// }
 
 export async function getPodHooks(handler: string): Promise<HooksModule> {
 	let hooksFile = null;
@@ -35,66 +38,68 @@ export async function getPodHooks(handler: string): Promise<HooksModule> {
 	}
 }
 
-export async function loadPodRoutes(router: Router) {
-	for (const plugin of await getPluginList()) {
-		if (plugin.resource !== "pod") continue;
+export async function loadAllPluginRoutes(routers: Router[]) {
+	for (const router of routers) {
+		for (const plugin of await getPluginList()) {
+			if (plugin.resource !== "pods") continue;
 
-		console.info(`${colors.bold("Loading:")} ${plugin.name}`);
+			console.info(`${colors.bold("Loading:")} ${plugin.name}`);
 
-		const pluginToml = await getPluginsToml(plugin.dir);
+			const routeName = plugin.name;
+			const routeNameCased =
+				plugin.name[0].toUpperCase() + plugin.name.slice(1);
 
-		const endpointModule = (await import(
-			path.join(plugin.dir, "server-deno/endpoints.ts")
-		)) as EndpointModule;
+			let pluginModule;
+			try {
+				pluginModule = (await import(
+					path.join(plugin.dir, `pod${routeNameCased}.ts`)
+				)) as PluginModule;
+			} catch {
+				console.log(`Skipping: ${plugin.name}`);
+				continue;
+			}
 
-		const sharedModule = (await import(
-			path.join(plugin.dir, "server-deno/shared.ts")
-		)) as SharedModule;
+			const makeState = pluginModule.makeState || (() => {});
 
-		const subrouter = new Router();
-		subrouter.get("/", utilSend.success);
+			const subrouter = new Router();
+			subrouter.get("/", utilSend.success);
 
-		for (const exprt in endpointModule) {
-			if (!Object.hasOwn(endpointModule, exprt)) continue;
+			for (const exprt in pluginModule) {
+				if (!Object.hasOwn(pluginModule, exprt)) continue;
+				if (!exprt.endsWith("Endpoint")) continue;
 
-			const endpoint = endpointModule[exprt];
+				const endpoint = pluginModule[exprt as `${string}Endpoint`];
 
-			console.info(`/pod/plugin/${pluginToml.name}${endpoint.route}`);
+				console.info(`/pod/plugin/${routeName}/${endpoint.route}`);
 
-			subrouter.post(endpoint.route, async (ctx) => {
-				const data = await util.unwrap<{
-					uuid?: string;
-					[key: string]: unknown;
-				}>(ctx, endpoint.schema.req);
+				subrouter.post(endpoint.route, async (ctx) => {
+					const data = await util.unwrap<{
+						uuid?: string;
+						[key: string]: unknown;
+					}>(ctx, endpoint.schema.req);
 
-				if (!data.uuid) {
-					throw new Error("Request must have 'uuid'");
-				}
+					if (!data.uuid) {
+						throw new Error("Request must have 'uuid'");
+					}
 
-				const pod = await util.getPod(data.uuid, pluginToml.name);
-				const state = sharedModule.makeState(pod);
+					const pod = await util.getPod(data.uuid, "pods");
+					const state = makeState(pod);
 
-				const result = await endpoint.api(pod, state, data);
-				return utilSend.json(ctx, result);
-			});
+					const result = await endpoint.api(pod, state, data);
+					return utilSend.json(ctx, result);
+				});
 
-			router.use(`/pod/plugin/${pluginToml.name}`, subrouter.routes());
+				router.use(`/pod/plugin/${routeName}`, subrouter.routes());
+			}
 		}
 	}
 }
 
-type Pack = {};
-
-export async function getPackList(): Promise<Pack[]> {
-	return [""];
-}
-
 type Plugin = {
 	name: string;
-	namePretty: string;
-	resource: string;
 	dir: string;
-	fromPack: string;
+	resource: string;
+	pack: string;
 };
 
 export async function getPluginList(): Promise<Plugin[]> {
@@ -104,61 +109,34 @@ export async function getPluginList(): Promise<Plugin[]> {
 	for await (const packEntry of await Deno.readDir(packsDir)) {
 		const packDir = path.join(packsDir, packEntry.name);
 		if (!packEntry.isDirectory) {
-			console.warn(`Skipping: ${packDir}`);
 			continue;
-		}
-
-		let packToml;
-		try {
-			const text = await Deno.readTextFile(path.join(packDir, "pack.toml"));
-			packToml = toml.parse(text);
-		} catch (err: unknown) {
-			if (err instanceof Deno.errors.NotFound) {
-				packToml = {};
-			} else {
-				throw err;
-			}
 		}
 
 		for await (const resourceEntry of await Deno.readDir(packDir)) {
 			const resourceDir = path.join(packDir, resourceEntry.name);
-			if (!resourceEntry.isDirectory) {
-				console.warn(`Skipping: ${resourceDir}`);
+			if (
+				!resourceEntry.isDirectory ||
+				(resourceEntry.name !== "collections" &&
+					resourceEntry.name !== "overviews" &&
+					resourceEntry.name !== "pods")
+			) {
 				continue;
 			}
 
 			for await (const pluginEntry of await Deno.readDir(resourceDir)) {
 				const pluginDir = path.join(resourceDir, pluginEntry.name);
 				if (!pluginEntry.isDirectory) {
-					console.warn(`Skipping: ${pluginDir}`);
 					continue;
 				}
 
-				let pluginConf;
-				try {
-					pluginConf = await getPluginsToml(pluginDir);
-				} catch (err) {
-					if (err instanceof Deno.errors.NotFound) {
-						pluginConf = {};
-					} else {
-						throw err;
-					}
-				}
-
 				for await (const partEntry of await Deno.readDir(pluginDir)) {
-					const partDir = path.join(pluginDir, partEntry.name);
-					if (!partEntry.isDirectory) {
-						console.warn(`Skipping: ${partDir}`);
-						continue;
-					}
+					const _partDir = path.join(pluginDir, partEntry.name);
 
 					plugins.push({
-						name: pluginConf.name,
-						namePretty: pluginConf.namePretty,
-						resource: pluginEntry.name.split("-")[0],
+						name: pluginEntry.name,
+						resource: resourceEntry.name,
 						dir: pluginDir,
-						packConfig: packEntry.name,
-						config: pluginConf,
+						pack: packEntry.name,
 					});
 				}
 			}
@@ -166,11 +144,4 @@ export async function getPluginList(): Promise<Plugin[]> {
 	}
 
 	return plugins;
-}
-
-export async function getPluginsToml(pluginDir: string) {
-	return util.validateSchema<typeof SchemaPluginToml>(
-		toml.parse(await Deno.readTextFile(path.join(pluginDir, "plugin.toml"))),
-		SchemaPluginToml
-	);
 }

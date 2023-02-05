@@ -1,7 +1,5 @@
 import { z, Context } from "@src/mod.ts";
 
-// TYPES
-
 export type Pod = {
 	handler: string;
 	uuid: string;
@@ -9,9 +7,6 @@ export type Pod = {
 	rootDir: string;
 };
 
-// INTERFACES
-
-// endpoint.ts
 export type Endpoint<
 	State,
 	Schema extends {
@@ -31,13 +26,6 @@ export type Endpoint<
 	) => Promise<z.infer<Schema["res"]>> | z.infer<Schema["res"]>;
 };
 
-export type EndpointModule = {
-	[key: string]: Endpoint<
-		unknown,
-		{ req: z.AnyZodObject; res: z.AnyZodObject }
-	>;
-};
-
 export type InternalEndpoint<
 	Schema extends {
 		req: z.AnyZodObject;
@@ -55,23 +43,18 @@ export type InternalEndpoint<
 	) => Promise<z.infer<Schema["res"]>> | z.infer<Schema["res"]>;
 };
 
-export type InternalEndpointModule = {
-	[key: string]: InternalEndpoint<{ req: z.AnyZodObject; res: z.AnyZodObject }>;
-};
-
-// hooks.ts
 export type OnPodCreate = (pod: Pod) => void | Promise<void>;
 
 export type OnPodRemove = (pod: Pod) => void | Promise<void>;
 
-export type HooksModule = {
+export type MakeState<T extends Record<string, unknown>> = (pod: Pod) => T;
+
+export type PluginModule = {
 	onPodCreate: OnPodCreate;
 	onPodRemove: OnPodRemove;
-};
-
-// shared.ts
-export type MakeState<T extends Record<string, unknown>> = (pod: Pod) => void;
-
-export type SharedModule = {
 	makeState: MakeState<Record<string, unknown>>;
+	[key: `${string}Endpoint`]: Endpoint<
+		unknown,
+		{ req: z.AnyZodObject; res: z.AnyZodObject }
+	>;
 };
