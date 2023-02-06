@@ -11,7 +11,7 @@ task.build() {
 		--import-map './import_map.json' './src/server.ts' -- './build/bundle.js'
 }
 
-task.r6elease-nightly() {
+task.release-nightly() {
 	task.build
 	tar czf './output/build.tar.gz' './build/bundle.js'
 
