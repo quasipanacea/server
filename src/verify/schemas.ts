@@ -1,28 +1,10 @@
 import { z } from "@src/mod.ts";
-
-const uuid_t = z.string().min(1);
+import { uuid_t, zodPod, zodCollection } from "@common/types.ts";
 
 export const ResourceSchemaPods = z.object({
-	pods: z.record(
-		uuid_t,
-		z.object({
-			handler: z.string().min(1),
-			name: z.string().min(1),
-		})
-	),
+	pods: z.record(uuid_t, zodPod.omit({ uuid: true })),
 });
 
 export const ResourceSchemaCollections = z.object({
-	collections: z.record(
-		uuid_t,
-		z.object({
-			handler: z.string().min(1),
-			name: z.string().min(1),
-		})
-	),
-});
-
-export const SchemaPluginToml = z.object({
-	name: z.string().min(1),
-	namePretty: z.string().min(1),
+	collections: z.record(uuid_t, zodCollection.omit({ uuid: true })),
 });

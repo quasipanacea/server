@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "~zod";
 import { path } from "@src/mod.ts";
 
 const schema = z.object({

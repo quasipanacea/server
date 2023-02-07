@@ -15,3 +15,4 @@ export {
 } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 export { helpers } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 export { type Middleware } from "https://deno.land/x/oak@v11.1.0/middleware.ts";
+export { fetchRequestHandler } from "npm:@trpc/server/adapters/fetch";

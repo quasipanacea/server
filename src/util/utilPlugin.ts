@@ -1,15 +1,7 @@
-import { path, Router, toml, colors } from "@src/mod.ts";
+import { path, Router, colors } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
 import { PluginModule } from "@src/verify/types.ts";
-import { SchemaPluginToml } from "@src/verify/schemas.ts";
 import * as utilSend from "@src/util/utilSend.ts";
-
-// export async function getPluginsToml(pluginDir: string) {
-// 	return util.validateSchema<typeof SchemaPluginToml>(
-// 		toml.parse(await Deno.readTextFile(path.join(pluginDir, "plugin.toml"))),
-// 		SchemaPluginToml
-// 	);
-// }
 
 export async function getPodHooks(handler: string): Promise<HooksModule> {
 	let hooksFile = null;

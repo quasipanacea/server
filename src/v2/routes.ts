@@ -1,7 +1,6 @@
 import { Router } from "@src/mod.ts";
 
 import * as utilSend from "@src/util/utilSend.ts";
-import * as utilPlugin from "@src/util/utilPlugin.ts";
 import * as unwrap from "@src/v2/unwrap.ts";
 import * as api from "@src/v2/api.ts";
 

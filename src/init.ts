@@ -1,7 +1,6 @@
-import { path, fs } from "./mod.ts";
+import { path, fs } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
 import * as utilResource from "@src/util/utilResource.ts";
-
 import { ResourceSchemaPods } from "@src/verify/schemas.ts";
 
 export async function init() {
@@ -39,16 +38,13 @@ export async function init() {
 
 	// Ensure a one to one correspondence from pod.json to directory structure
 	{
-		const podMetafile = util.getPodsJsonFile();
-		const obj = util.validateSchema<typeof ResourceSchemaPods>(
-			JSON.parse(await Deno.readTextFile(podMetafile)),
-			ResourceSchemaPods
-		);
-		if (obj.pods) {
-			for (const uuid in obj.pods) {
-				if (!Object.hasOwn(obj.pods, uuid)) continue;
+		const podsJsonFile = util.getPodsJsonFile();
+		const podsJson = await util.getPodsJson();
+		if (podsJson.pods) {
+			for (const uuid in podsJson.pods) {
+				if (!Object.hasOwn(podsJson.pods, uuid)) continue;
 
-				const filepath = utilResource.getResourceDir("pods", uuid);
+				const filepath = utilResource.getPodDir(uuid);
 				try {
 					await Deno.stat(filepath);
 
@@ -56,13 +52,13 @@ export async function init() {
 						console.log(
 							`in pods.json, and in FS, but empty, so removing everywhere: ${filepath}`
 						);
-						delete obj.pods[uuid];
+						delete podsJson.pods[uuid];
 						await Deno.remove(filepath);
 						await Deno.remove(path.dirname(filepath));
 					}
 				} catch (err) {
 					if (err instanceof Deno.errors.NotFound) {
-						delete obj.pods[uuid];
+						delete podsJson.pods[uuid];
 						console.log(
 							`in pods.json, but not FS, so removing pods.json entry: ${filepath}`
 						);
@@ -70,17 +66,17 @@ export async function init() {
 				}
 			}
 
-			await Deno.writeTextFile(podMetafile, JSON.stringify(obj, null, "\t"));
+			await Deno.writeTextFile(
+				podsJsonFile,
+				JSON.stringify(podsJson, null, "\t")
+			);
 		}
 	}
 
 	// Ensure a one to one correspondence from directory to pod.json
 	{
-		const podMetafile = util.getPodsJsonFile();
-		const obj = util.validateSchema<typeof ResourceSchemaPods>(
-			JSON.parse(await Deno.readTextFile(podMetafile)),
-			ResourceSchemaPods
-		);
+		const podsJsonFile = util.getPodsJsonFile();
+		const podsJson = await util.getPodsJson();
 		const podDir = util.getPodDir();
 		for await (const dir of await Deno.readDir(podDir)) {
 			const firstTwo = dir.name;
@@ -91,7 +87,7 @@ export async function init() {
 				const finalpath = path.join(podDir, firstTwo, rest.name);
 				const uuid = `${firstTwo}${rest.name}`;
 
-				if (!obj.pods[uuid]) {
+				if (!podsJson.pods[uuid]) {
 					if ((await all(await Deno.readDir(finalpath))).length == 0) {
 						await Deno.remove(finalpath);
 						await Deno.remove(path.dirname(finalpath));

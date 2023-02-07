@@ -3,9 +3,8 @@ import { path, Context, z, toml } from "@src/mod.ts";
 import { config } from "@src/util/config.ts";
 import * as util from "@src/util/util.ts";
 import * as utilResource from "@src/util/utilResource.ts";
-import { Pod } from "@src/verify/types.ts";
-
-import { ResourceSchemaPods } from "../verify/schemas.ts";
+import { ResourceSchemaPods } from "@src/verify/schemas.ts";
+import { zodPod } from "@common/types.ts";
 
 export function jsonStringify(obj: Record<string, unknown>) {
 	return JSON.stringify(obj, null, "\t");
@@ -150,8 +149,11 @@ export async function run_bg(args: string[]) {
 	p.close();
 }
 
-export async function getPod(uuid: string, handler?: string): Promise<Pod> {
-	const dir = utilResource.getResourceDir("pods", uuid);
+export async function getPod(
+	uuid: string,
+	handler?: string
+): Promise<z.infer<typeof zodPod>> {
+	const dir = utilResource.getPodDir(uuid);
 	const rootDir = path.dirname(dir);
 
 	if (!handler) {

@@ -2,3 +2,4 @@ common
 output/
 public/
 build/
+.vscode/
