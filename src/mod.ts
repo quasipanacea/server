@@ -1,18 +1,16 @@
-export * as path from "https://deno.land/std@0.165.0/path/mod.ts";
-export * as fs from "https://deno.land/std@0.165.0/fs/mod.ts";
-export * as conversion from "https://deno.land/std@0.165.0/streams/conversion.ts";
-export * as toml from "https://deno.land/std@0.165.0/encoding/toml.ts";
-export * as colors from "https://deno.land/std@0.165.0/fmt/colors.ts";
-export { Status } from "https://deno.land/std@0.165.0/http/http_status.ts";
-export { serve } from "https://deno.land/std@0.165.0/http/server.ts";
+export * as path from "~std/path/mod.ts";
+export * as fs from "~std/fs/mod.ts";
+export * as streams from "~std/streams/mod.ts";
+export * as toml from "~std/encoding/toml.ts";
+export * as colors from "~std/fmt/colors.ts";
+export { Status } from "~std/http/http_status.ts";
+export { serve } from "~std/http/server.ts";
 
-export { z } from "https://deno.land/x/zod@v3.19.1/mod.ts";
-export {
-	Application,
-	Router,
-	Context,
-	send,
-} from "https://deno.land/x/oak@v11.1.0/mod.ts";
-export { helpers } from "https://deno.land/x/oak@v11.1.0/mod.ts";
-export { type Middleware } from "https://deno.land/x/oak@v11.1.0/middleware.ts";
-export { fetchRequestHandler } from "npm:@trpc/server/adapters/fetch";
+export { Application, Router, Context, send } from "~oak/mod.ts";
+export { helpers } from "~oak/mod.ts";
+export { type Middleware } from "~oak/middleware.ts";
+
+export { z } from "~zod";
+export { fetchRequestHandler } from "~trpc-server/adapters/fetch";
+export type { inferProcedureInput, inferProcedureOutput } from "~trpc-server";
+export { TRPCError } from "~trpc-server";

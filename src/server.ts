@@ -1,29 +1,22 @@
-import { Application, Router } from "@src/mod.ts";
+import { serve, fetchRequestHandler } from "@src/mod.ts";
+import type { FetchCreateContextFnOptions } from "~trpc-server/adapters/fetch";
 
 import { init } from "@src/init.ts";
-import * as utilPlugin from "@src/util/utilPlugin.ts";
-import { router as routesV2 } from "@src/v2/routes.ts";
-import {
-	handleErrors,
-	handleLogs,
-	handleStaticserve,
-} from "@src/helpers/middleware.ts";
+import { createContext } from "@common/trpc.ts";
+import { appRouter } from "@common/routes.ts";
 
 await init();
 
-const app = new Application();
-app.use(handleErrors);
-app.use(handleLogs);
-app.use(handleStaticserve);
+function handler(request: Request) {
+	return fetchRequestHandler({
+		endpoint: "/trpc",
+		req: request,
+		router: appRouter,
+		onError({ error, type, path, input, ctx, req }) {
+			console.error("Error:", error);
+		},
+		createContext,
+	});
+}
 
-const router = new Router();
-
-await utilPlugin.loadAllPluginRoutes([routesV2]);
-
-router.use("/api/v2", routesV2.routes());
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-const port = 15_800;
-console.info(`Listening on port ${port}`);
-await app.listen({ port });
+await serve(handler, { port: 15_799 });

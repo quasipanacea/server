@@ -1,12 +1,8 @@
 import { path, fs } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
 import * as utilResource from "@src/util/utilResource.ts";
-import { ResourceSchemaPods } from "@src/verify/schemas.ts";
 
 export async function init() {
-	const defaultDir = await util.getDefaultDir();
-	await Deno.mkdir(defaultDir, { recursive: true });
-
 	const dataDir = await util.getDataDir();
 	await Deno.mkdir(dataDir, { recursive: true });
 
@@ -38,8 +34,8 @@ export async function init() {
 
 	// Ensure a one to one correspondence from pod.json to directory structure
 	{
-		const podsJsonFile = util.getPodsJsonFile();
-		const podsJson = await util.getPodsJson();
+		const podsJsonFile = utilResource.getPodsJsonFile();
+		const podsJson = await utilResource.getPodsJson();
 		if (podsJson.pods) {
 			for (const uuid in podsJson.pods) {
 				if (!Object.hasOwn(podsJson.pods, uuid)) continue;
@@ -48,7 +44,7 @@ export async function init() {
 				try {
 					await Deno.stat(filepath);
 
-					if ((await all(await Deno.readDir(filepath))).length == 0) {
+					if ((await dircount(await Deno.readDir(filepath))).length == 0) {
 						console.log(
 							`in pods.json, and in FS, but empty, so removing everywhere: ${filepath}`
 						);
@@ -75,9 +71,13 @@ export async function init() {
 
 	// Ensure a one to one correspondence from directory to pod.json
 	{
-		const podsJsonFile = util.getPodsJsonFile();
-		const podsJson = await util.getPodsJson();
-		const podDir = util.getPodDir();
+		const podsJsonFile = utilResource.getPodsJsonFile();
+		const podsJson = await utilResource.getPodsJson();
+		const podDir = utilResource.getPodsDir();
+		// TODO
+		if (!(await fs.exists(podDir))) {
+			return;
+		}
 		for await (const dir of await Deno.readDir(podDir)) {
 			const firstTwo = dir.name;
 
@@ -88,7 +88,7 @@ export async function init() {
 				const uuid = `${firstTwo}${rest.name}`;
 
 				if (!podsJson.pods[uuid]) {
-					if ((await all(await Deno.readDir(finalpath))).length == 0) {
+					if ((await dircount(await Deno.readDir(finalpath))).length == 0) {
 						await Deno.remove(finalpath);
 						await Deno.remove(path.dirname(finalpath));
 					} else {
@@ -100,7 +100,9 @@ export async function init() {
 	}
 }
 
-async function all<T>(source: AsyncIterable<T> | Iterable<T>): Promise<T[]> {
+async function dircount<T>(
+	source: AsyncIterable<T> | Iterable<T>
+): Promise<T[]> {
 	const arr = [];
 
 	for await (const entry of source) {

@@ -1,22 +1,22 @@
-import { path, z } from "@src/mod.ts";
+import { path } from "@src/mod.ts";
 
 import * as util from "@src/util/util.ts";
-import * as schemas from "@src/verify/schemas.ts";
+import * as tt from "@src/ttypes.ts";
+
+export function getPodsDir(): string {
+	return path.join(util.getDataDir(), "pods");
+}
+
+export function getCollectionsDir(): string {
+	return path.join(util.getDataDir(), "collections");
+}
 
 export function getPodDir(uuid: string): string {
-	return path.join(
-		path.join(util.getDataDir(), "pods"),
-		uuid.slice(0, 2),
-		uuid.slice(2)
-	);
+	return path.join(getPodsDir(), uuid.slice(0, 2), uuid.slice(2));
 }
 
 export function getCollectionDir(uuid: string): string {
-	return path.join(
-		path.join(util.getDataDir(), "collections"),
-		uuid.slice(0, 2),
-		uuid.slice(2)
-	);
+	return path.join(getCollectionsDir(), uuid.slice(0, 2), uuid.slice(2));
 }
 
 export function getPodsJsonFile(): string {
@@ -27,10 +27,8 @@ export function getCollectionsJsonFile(): string {
 	return path.join(util.getDataDir(), "collections.json");
 }
 
-export async function getPodsJson(): Promise<
-	z.infer<typeof schemas.ResourceSchemaPods>
-> {
-	const jsonFile = getCollectionsJsonFile();
+export async function getPodsJson(): Promise<tt.SchemaPodsJson_t> {
+	const jsonFile = getPodsJsonFile();
 	let content;
 	try {
 		content = await Deno.readTextFile(jsonFile);
@@ -43,15 +41,13 @@ export async function getPodsJson(): Promise<
 		}
 	}
 
-	return util.validateSchema<typeof schemas.ResourceSchemaPods>(
+	return util.validateSchema<typeof tt.SchemaPodsJson>(
 		JSON.parse(content),
-		schemas.ResourceSchemaPods
+		tt.SchemaPodsJson
 	);
 }
 
-export async function getCollectionsJson(): Promise<
-	z.infer<typeof schemas.ResourceSchemaCollections>
-> {
+export async function getCollectionsJson(): Promise<tt.SchemaCollectionsJson_t> {
 	const jsonFile = getCollectionsJsonFile();
 	let content;
 	try {
@@ -65,8 +61,8 @@ export async function getCollectionsJson(): Promise<
 		}
 	}
 
-	return util.validateSchema<typeof schemas.ResourceSchemaCollections>(
+	return util.validateSchema<typeof tt.SchemaCollectionsJson>(
 		JSON.parse(content),
-		schemas.ResourceSchemaCollections
+		tt.SchemaCollectionsJson
 	);
 }
