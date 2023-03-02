@@ -46,5 +46,5 @@ app.use(router.allowedMethods());
 app.use(handleIndex);
 
 const port = 15_800;
-console.info(`Listening on port ${port}`);
+console.info(`Listening on http://localhost:${port}`);
 await app.listen({ port });
