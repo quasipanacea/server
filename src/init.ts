@@ -11,12 +11,14 @@ export async function init() {
 		const packsDir = util.getPacksDir();
 		const symlinksDir = path.join(packsDir, "../resource-symlinks");
 
-		for await (const resourceEntry of await Deno.readDir(symlinksDir)) {
-			const resourceDir = path.join(symlinksDir, resourceEntry.name);
+		if (await fs.exists(symlinksDir)) {
+			for await (const resourceEntry of await Deno.readDir(symlinksDir)) {
+				const resourceDir = path.join(symlinksDir, resourceEntry.name);
 
-			for await (const part of await Deno.readDir(resourceDir)) {
-				const partFile = path.join(resourceDir, part.name);
-				await Deno.remove(partFile);
+				for await (const part of await Deno.readDir(resourceDir)) {
+					const partFile = path.join(resourceDir, part.name);
+					await Deno.remove(partFile);
+				}
 			}
 		}
 		for await (const entry of fs.walk(packsDir)) {

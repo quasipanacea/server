@@ -1,5 +1,6 @@
 import { Context, Status, send, path } from "@src/mod.ts";
 
+import * as util from "@src/util/util.ts";
 import { JSONError } from "@src/util/util.ts";
 
 type Next = () => Promise<unknown>;
@@ -44,7 +45,32 @@ export async function handleStaticserve(ctx: Context, next: Next) {
 		return;
 	}
 
+	const public_dir = util.get_public_dir();
+	console.log("static: ", ctx.request.url);
 	await send(ctx, pathname.slice("/public".length), {
-		root: path.join(Deno.cwd(), "./public"),
+		root: public_dir,
+	});
+}
+
+export async function handleStaticserve2(ctx: Context, next: Next) {
+	const pathname = ctx.request.url.pathname;
+	if (!pathname.startsWith("/assets")) {
+		await next();
+		return;
+	}
+
+	const public_dir = util.get_public_dir();
+	console.log("assets: ", ctx.request.url);
+	await send(ctx, pathname.slice("/assets".length), {
+		root: path.join(public_dir, "assets"),
+	});
+}
+
+export async function handleIndex(ctx: Context) {
+	const public_dir = util.get_public_dir();
+
+	console.log("index: " + ctx.request.url);
+	await send(ctx, "index.html", {
+		root: public_dir,
 	});
 }

@@ -5,6 +5,8 @@ import {
 	handleErrors,
 	handleLogs,
 	handleStaticserve,
+	handleStaticserve2,
+	handleIndex,
 } from "@src/helpers/middleware.ts";
 import { appRouter } from "@common/routes.ts";
 import { createContext } from "@common/trpc.ts";
@@ -15,6 +17,7 @@ const app = new Application();
 app.use(handleErrors);
 app.use(handleLogs);
 app.use(handleStaticserve);
+app.use(handleStaticserve2);
 
 const router = new Router();
 
@@ -23,7 +26,10 @@ router.all("/trpc/:_", async (ctx) => {
 		endpoint: "/trpc",
 		req: new Request(ctx.request.url, {
 			headers: ctx.request.headers,
-			body: ctx.request.body({ type: "stream" }).value,
+			body:
+				ctx.request.method !== "GET" && ctx.request.method !== "HEAD"
+					? ctx.request.body({ type: "stream" }).value
+					: undefined,
 			method: ctx.request.method,
 		}),
 		router: appRouter,
@@ -36,6 +42,8 @@ router.all("/trpc/:_", async (ctx) => {
 });
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+app.use(handleIndex);
 
 const port = 15_800;
 console.info(`Listening on port ${port}`);

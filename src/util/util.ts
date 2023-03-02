@@ -13,8 +13,27 @@ export function tomlStringify(obj: Record<string, unknown>) {
 }
 
 // misc
+export function get_public_dir() {
+	let public_dir = "";
+	const env = Deno.env.get("QP_PUBLIC");
+	if (env) {
+		public_dir = env;
+	} else {
+		public_dir = path.join(Deno.cwd(), "./public");
+	}
+
+	return public_dir;
+}
+
 export function getPacksDir() {
-	return path.join(Deno.cwd(), "common/packs");
+	let common_dir;
+	const env = Deno.env.get("QP_COMMON");
+	if (env) {
+		common_dir = env;
+	} else {
+		common_dir = path.join(Deno.cwd(), "common");
+	}
+	return path.join(common_dir, "packs");
 }
 
 export function getDataDir() {

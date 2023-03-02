@@ -54,7 +54,7 @@ export async function getPluginList(): Promise<t.Plugin_t[]> {
 
 				plugins.push({
 					id: pluginEntry.name,
-					kind: resourceEntry.name.slice(0, -1),
+					kind: resourceEntry.name.slice(0, -1) as t.Plugin_t["kind"],
 					dir: pluginDir,
 				});
 			}
