@@ -7,7 +7,7 @@ task.dev() {
 
 task.build() {
 	mkdir -p './build'
-	deno bundle './src/serverOld.ts' -- './build/bundle.js'
+	deno bundle './src/server.ts' -- './build/bundle.js'
 }
 
 task.release-nightly() {

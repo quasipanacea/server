@@ -38,39 +38,20 @@ export async function handleLogs({ request: req }: Context, next: Next) {
 	await next();
 }
 
-export async function handleStaticserve(ctx: Context, next: Next) {
+export async function handleAssets(ctx: Context, next: Next) {
 	const pathname = ctx.request.url.pathname;
-	if (!pathname.startsWith("/public")) {
-		await next();
-		return;
-	}
 
-	const public_dir = util.get_public_dir();
-	console.log("static: ", ctx.request.url);
-	await send(ctx, pathname.slice("/public".length), {
-		root: public_dir,
-	});
+	if (pathname.startsWith("/assets")) {
+		await send(ctx, pathname.slice("/assets".length), {
+			root: util.get_public_dir(),
+		});
+	} else {
+		await next();
+	}
 }
 
-export async function handleStaticserve2(ctx: Context, next: Next) {
-	const pathname = ctx.request.url.pathname;
-	if (!pathname.startsWith("/assets")) {
-		await next();
-		return;
-	}
-
-	const public_dir = util.get_public_dir();
-	console.log("assets: ", ctx.request.url);
-	await send(ctx, pathname.slice("/assets".length), {
-		root: path.join(public_dir, "assets"),
-	});
-}
-
-export async function handleIndex(ctx: Context) {
-	const public_dir = util.get_public_dir();
-
-	console.log("index: " + ctx.request.url);
+export async function handle404(ctx: Context) {
 	await send(ctx, "index.html", {
-		root: public_dir,
+		root: util.get_public_dir(),
 	});
 }
