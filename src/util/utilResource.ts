@@ -1,7 +1,18 @@
-import { path } from "@src/mod.ts";
+import { z, path } from "@src/mod.ts";
 
 import * as util from "@src/util/util.ts";
-import * as tt from "@src/ttypes.ts";
+
+import * as t from "@common/types.ts";
+
+const SchemaPodsJson = z.object({
+	pods: z.record(t.Uuid, t.Pod.omit({ uuid: true })),
+});
+type SchemaPodsJson_t = z.infer<typeof SchemaPodsJson>;
+
+const SchemaCollectionsJson = z.object({
+	collections: z.record(t.Uuid, t.Collection.omit({ uuid: true })),
+});
+type SchemaCollectionsJson_t = z.infer<typeof SchemaCollectionsJson>;
 
 export function getPodsDir(): string {
 	return path.join(util.getDataDir(), "pods");
@@ -27,7 +38,7 @@ export function getCollectionsJsonFile(): string {
 	return path.join(util.getDataDir(), "collections.json");
 }
 
-export async function getPodsJson(): Promise<tt.SchemaPodsJson_t> {
+export async function getPodsJson(): Promise<SchemaPodsJson_t> {
 	const jsonFile = getPodsJsonFile();
 	let content;
 	try {
@@ -41,13 +52,13 @@ export async function getPodsJson(): Promise<tt.SchemaPodsJson_t> {
 		}
 	}
 
-	return util.validateSchema<typeof tt.SchemaPodsJson>(
+	return util.validateSchema<typeof SchemaPodsJson>(
 		JSON.parse(content),
-		tt.SchemaPodsJson
+		SchemaPodsJson
 	);
 }
 
-export async function getCollectionsJson(): Promise<tt.SchemaCollectionsJson_t> {
+export async function getCollectionsJson(): Promise<SchemaCollectionsJson_t> {
 	const jsonFile = getCollectionsJsonFile();
 	let content;
 	try {
@@ -61,8 +72,8 @@ export async function getCollectionsJson(): Promise<tt.SchemaCollectionsJson_t> 
 		}
 	}
 
-	return util.validateSchema<typeof tt.SchemaCollectionsJson>(
+	return util.validateSchema<typeof SchemaCollectionsJson>(
 		JSON.parse(content),
-		tt.SchemaCollectionsJson
+		SchemaCollectionsJson
 	);
 }

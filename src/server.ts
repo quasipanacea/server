@@ -1,14 +1,12 @@
 import { Application, Router, fetchRequestHandler } from "@src/mod.ts";
 
-import { init } from "@src/init.ts";
+import { init, createContext, appRouter, oakPluginsRouter } from "@src/init.ts";
 import {
 	handleErrors,
 	handleLogs,
 	handleAssets,
 	handle404,
 } from "@src/helpers/middleware.ts";
-import { appRouter } from "@common/routes.ts";
-import { createContext } from "@common/trpc.ts";
 
 await init();
 
@@ -19,6 +17,7 @@ app.use(handleAssets);
 
 const router = new Router();
 
+// trpc
 router.all("/trpc/:_", async (ctx) => {
 	const res = await fetchRequestHandler({
 		endpoint: "/trpc",
@@ -32,15 +31,20 @@ router.all("/trpc/:_", async (ctx) => {
 		}),
 		router: appRouter,
 		createContext,
+		onError({ error, type, path, input, ctx, req }) {
+			console.error(error);
+		},
 	});
 
 	ctx.response.status = res.status;
 	ctx.response.headers = res.headers;
 	ctx.response.body = res.body;
 });
+
+router.use("/api/plugins", oakPluginsRouter.routes());
+
 app.use(router.routes());
 app.use(router.allowedMethods());
-
 app.use(handle404);
 
 const port = 15_800;

@@ -1,6 +1,17 @@
-import { path, fs } from "@src/mod.ts";
+import { path, fs, Router } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
 import * as utilResource from "@src/util/utilResource.ts";
+
+import { trpc } from "@common/trpc.ts";
+import { coreRouter } from "@common/routes.ts";
+
+import { trpcRouter as markdownRouter } from "@common/packs/Core/pods/markdown/podMarkdown.ts";
+import { trpcRouter as plaintextRouter } from "@common/packs/Core/pods/plaintext/podPlaintext.ts";
+import { trpcRouter as latexRouter } from "@common/packs/Core/pods/latex/podLatex.ts";
+
+import { oakRouter as oakLatexRouter } from "@common/packs/Core/pods/latex/podLatex.ts";
+
+export { createContext } from "@common/trpc.ts";
 
 export async function init() {
 	const dataDir = await util.getDataDir();
@@ -113,3 +124,32 @@ async function dircount<T>(
 
 	return arr;
 }
+
+export const appRouter = trpc.router({
+	core: coreRouter,
+	plugins: trpc.router({
+		pods: trpc.router({
+			markdown: markdownRouter,
+			plaintext: plaintextRouter,
+			latex: latexRouter,
+		}),
+	}),
+});
+export type AppRouter = typeof appRouter;
+
+export const oakPluginsRouter = (() => {
+	const router = new Router();
+
+	// pods
+	{
+		const podsRouter = new Router();
+
+		podsRouter.use("/latex", oakLatexRouter.routes());
+		podsRouter.use(oakLatexRouter.allowedMethods());
+
+		router.use("/pods", podsRouter.routes());
+		router.use(podsRouter.allowedMethods());
+	}
+
+	return router;
+})();
