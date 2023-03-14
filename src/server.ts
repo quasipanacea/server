@@ -1,6 +1,6 @@
 import { Application, Router, fetchRequestHandler } from "@src/mod.ts";
 
-import { init, createContext, appRouter, oakPluginsRouter } from "@src/init.ts";
+import { init, createContext, appRouter, apiRouter } from "@src/init.ts";
 import {
 	handleErrors,
 	handleLogs,
@@ -11,11 +11,11 @@ import {
 await init();
 
 const app = new Application();
-app.use(handleErrors);
-app.use(handleLogs);
-app.use(handleAssets);
-
 const router = new Router();
+
+router.use(handleErrors);
+router.use(handleLogs);
+router.use(handleAssets);
 
 // trpc
 router.all("/trpc/:_", async (ctx) => {
@@ -41,12 +41,15 @@ router.all("/trpc/:_", async (ctx) => {
 	ctx.response.body = res.body;
 });
 
-router.use("/api/plugins", oakPluginsRouter.routes());
+router.use("/api", apiRouter.routes());
+router.use("/api", apiRouter.allowedMethods());
+router.use(handle404);
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.use(handle404);
 
-const port = 15_800;
-console.info(`Listening on http://localhost:${port}`);
-await app.listen({ port });
+app.addEventListener("listen", (ev) => {
+	console.info(`Listening on http://localhost:${ev.port}`);
+});
+
+await app.listen({ port: 15_800 });

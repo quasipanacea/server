@@ -42,9 +42,13 @@ export async function handleAssets(ctx: Context, next: Next) {
 	const pathname = ctx.request.url.pathname;
 
 	if (pathname.startsWith("/assets")) {
-		await send(ctx, pathname.slice("/assets".length), {
-			root: util.get_public_dir(),
-		});
+		try {
+			await send(ctx, pathname.slice("/assets".length), {
+				root: util.get_public_dir(),
+			});
+		} catch {
+			await next();
+		}
 	} else {
 		await next();
 	}

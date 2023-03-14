@@ -39,9 +39,10 @@ export async function getPluginList(): Promise<t.Plugin_t[]> {
 			const resourceDir = path.join(packDir, resourceEntry.name);
 			if (
 				!resourceEntry.isDirectory ||
-				(resourceEntry.name !== "collections" &&
+				(resourceEntry.name !== "groups" &&
 					resourceEntry.name !== "overviews" &&
-					resourceEntry.name !== "pods")
+					resourceEntry.name !== "pods" &&
+					resourceEntry.name !== "covers")
 			) {
 				continue;
 			}

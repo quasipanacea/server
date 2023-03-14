@@ -1,4 +1,4 @@
-import { path, fs, Router } from "@src/mod.ts";
+import { path, fs, Router, Status } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
 import * as utilResource from "@src/util/utilResource.ts";
 
@@ -39,6 +39,20 @@ export async function init() {
 				await Deno.symlink(entry.path, symlink);
 			} else if (entry.name.startsWith("Pod") && entry.name.endsWith(".vue")) {
 				const symlink = path.join(symlinksDir, "pods", entry.name);
+				await Deno.mkdir(path.dirname(symlink), { recursive: true });
+				await Deno.symlink(entry.path, symlink);
+			} else if (
+				entry.name.startsWith("Cover") &&
+				entry.name.endsWith(".vue")
+			) {
+				const symlink = path.join(symlinksDir, "cover", entry.name);
+				await Deno.mkdir(path.dirname(symlink), { recursive: true });
+				await Deno.symlink(entry.path, symlink);
+			} else if (
+				entry.name.startsWith("Collection") &&
+				entry.name.endsWith(".vue")
+			) {
+				const symlink = path.join(symlinksDir, "collection", entry.name);
 				await Deno.mkdir(path.dirname(symlink), { recursive: true });
 				await Deno.symlink(entry.path, symlink);
 			}
@@ -125,6 +139,7 @@ async function dircount<T>(
 	return arr;
 }
 
+// trpc router
 export const appRouter = trpc.router({
 	core: coreRouter,
 	plugins: trpc.router({
@@ -137,19 +152,29 @@ export const appRouter = trpc.router({
 });
 export type AppRouter = typeof appRouter;
 
-export const oakPluginsRouter = (() => {
-	const router = new Router();
+// api router
+export const apiRouter = new Router()
+	.use(
+		"/plugins",
+		new Router()
+			.use(
+				"/pod",
+				new Router()
+					.use("/latex", oakLatexRouter.routes())
 
-	// pods
-	{
-		const podsRouter = new Router();
-
-		podsRouter.use("/latex", oakLatexRouter.routes());
-		podsRouter.use(oakLatexRouter.allowedMethods());
-
-		router.use("/pods", podsRouter.routes());
-		router.use(podsRouter.allowedMethods());
-	}
-
-	return router;
-})();
+					.get("/(.*)", (ctx) => {
+						ctx.response.status = Status.NotFound;
+						ctx.response.body = "Failed to find plugin route\n";
+					})
+					.routes()
+			)
+			.get("/(.*)", (ctx) => {
+				ctx.response.status = Status.NotFound;
+				ctx.response.body = "Plugin not found\n";
+			})
+			.routes()
+	)
+	.get("/(.*)", (ctx) => {
+		ctx.response.status = Status.NotFound;
+		ctx.response.body = "Failed to find API route\n";
+	});
