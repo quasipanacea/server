@@ -43,7 +43,8 @@ router.all("/trpc/:_", async (ctx) => {
 
 router.use("/api", apiRouter.routes());
 router.use("/api", apiRouter.allowedMethods());
-router.use(handle404);
+
+router.get("/(.*)", handle404);
 
 app.use(router.routes());
 app.use(router.allowedMethods());

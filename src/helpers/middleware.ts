@@ -3,7 +3,7 @@ import { Context, Status, send, path } from "@src/mod.ts";
 import * as util from "@src/util/util.ts";
 import { JSONError } from "@src/util/util.ts";
 
-type Next = () => Promise<unknown>;
+type Next = () => Promise<unknown>; // TODO
 
 export async function handleErrors({ response }: Context, next: Next) {
 	try {
@@ -42,13 +42,9 @@ export async function handleAssets(ctx: Context, next: Next) {
 	const pathname = ctx.request.url.pathname;
 
 	if (pathname.startsWith("/assets")) {
-		try {
-			await send(ctx, pathname.slice("/assets".length), {
-				root: util.get_public_dir(),
-			});
-		} catch {
-			await next();
-		}
+		await send(ctx, pathname, {
+			root: util.get_public_dir(),
+		});
 	} else {
 		await next();
 	}
