@@ -18,7 +18,7 @@ router.use(handleLogs);
 router.use(handleAssets);
 
 // trpc
-router.all("/trpc/:_", async (ctx) => {
+router.all("/trpc/(.*)", async (ctx) => {
 	const res = await fetchRequestHandler({
 		endpoint: "/trpc",
 		req: new Request(ctx.request.url, {
@@ -31,7 +31,7 @@ router.all("/trpc/:_", async (ctx) => {
 		}),
 		router: appRouter,
 		createContext,
-		onError({ error, type, path, input, ctx, req }) {
+		onError({ error }) {
 			console.error(error);
 		},
 	});

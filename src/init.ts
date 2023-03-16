@@ -14,7 +14,7 @@ import { oakRouter as oakLatexRouter } from "@common/packs/Core/pods/latex/podLa
 export { createContext } from "@common/trpc.ts";
 
 export async function init() {
-	const dataDir = await util.getDataDir();
+	const dataDir = util.getDataDir();
 	await Deno.mkdir(dataDir, { recursive: true });
 
 	// Create symlinks so Vite can perform dynamic import
@@ -23,10 +23,10 @@ export async function init() {
 		const symlinksDir = path.join(packsDir, "../resource-symlinks");
 
 		if (await fs.exists(symlinksDir)) {
-			for await (const resourceEntry of await Deno.readDir(symlinksDir)) {
+			for await (const resourceEntry of Deno.readDir(symlinksDir)) {
 				const resourceDir = path.join(symlinksDir, resourceEntry.name);
 
-				for await (const part of await Deno.readDir(resourceDir)) {
+				for await (const part of Deno.readDir(resourceDir)) {
 					const partFile = path.join(resourceDir, part.name);
 					await Deno.remove(partFile);
 				}
@@ -49,10 +49,10 @@ export async function init() {
 				await Deno.mkdir(path.dirname(symlink), { recursive: true });
 				await Deno.symlink(entry.path, symlink);
 			} else if (
-				entry.name.startsWith("Collection") &&
+				entry.name.startsWith("Group") &&
 				entry.name.endsWith(".vue")
 			) {
-				const symlink = path.join(symlinksDir, "collection", entry.name);
+				const symlink = path.join(symlinksDir, "group", entry.name);
 				await Deno.mkdir(path.dirname(symlink), { recursive: true });
 				await Deno.symlink(entry.path, symlink);
 			}
@@ -71,7 +71,7 @@ export async function init() {
 				try {
 					await Deno.stat(filepath);
 
-					if ((await dircount(await Deno.readDir(filepath))).length == 0) {
+					if ((await dircount(Deno.readDir(filepath))).length == 0) {
 						console.log(
 							`in pods.json, and in FS, but empty, so removing everywhere: ${filepath}`
 						);
@@ -105,17 +105,15 @@ export async function init() {
 		if (!(await fs.exists(podDir))) {
 			return;
 		}
-		for await (const dir of await Deno.readDir(podDir)) {
+		for await (const dir of Deno.readDir(podDir)) {
 			const firstTwo = dir.name;
 
-			for await (const rest of await Deno.readDir(
-				path.join(podDir, firstTwo)
-			)) {
+			for await (const rest of Deno.readDir(path.join(podDir, firstTwo))) {
 				const finalpath = path.join(podDir, firstTwo, rest.name);
 				const uuid = `${firstTwo}${rest.name}`;
 
 				if (!podsJson.pods[uuid]) {
-					if ((await dircount(await Deno.readDir(finalpath))).length == 0) {
+					if ((await dircount(Deno.readDir(finalpath))).length == 0) {
 						await Deno.remove(finalpath);
 						await Deno.remove(path.dirname(finalpath));
 					} else {
