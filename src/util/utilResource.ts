@@ -25,8 +25,8 @@ export function getPodsDir(): string {
 	return path.join(util.getDataDir(), "pods");
 }
 
-export function getCollectionsDir(): string {
-	return path.join(util.getDataDir(), "collections");
+export function getGroupsDir(): string {
+	return path.join(util.getDataDir(), "groups");
 }
 
 export function getCoversDir(): string {
@@ -52,7 +52,7 @@ export function getPodDir(uuid: string): string {
 }
 
 export function getGroupDir(uuid: string): string {
-	return path.join(getCollectionsDir(), uuid.slice(0, 2), uuid.slice(2));
+	return path.join(getGroupsDir(), uuid.slice(0, 2), uuid.slice(2));
 }
 
 export function getCoverDir(uuid: string): string {
