@@ -1,12 +1,12 @@
 import { path, fs, Router, Status } from '@server/mod.ts'
 
-import * as util from '@quazipanacea/common/util.ts'
-import * as utilResource from '@quazipanacea/common/utilResource.ts'
-import { trpc } from '@quazipanacea/common/trpc.ts'
-import { coreRouter } from '@quazipanacea/common/routes.ts'
-export { createContext } from '@quazipanacea/common/trpc.ts'
+import * as util from '@quasipanacea/common/util.ts'
+import * as utilResource from '@quasipanacea/common/utilResource.ts'
+import { trpc } from '@quasipanacea/common/trpc.ts'
+import { coreRouter } from '@quasipanacea/common/routes.ts'
+export { createContext } from '@quasipanacea/common/trpc.ts'
 
-import { podPlugins } from '@quazipanacea/pack-core/_server.ts'
+import { podPlugins } from '@quasipanacea/pack-core/_server.ts'
 
 export async function init() {
 	const dataDir = util.getDataDir()
