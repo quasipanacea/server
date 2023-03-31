@@ -2,11 +2,11 @@
 	"imports": {
 		"@server/": "./src/",
 		"@quasipanacea/": "./dependencies/@quasipanacea/",
-		"~std/": "https://deno.land/std@0.181.0/",
-		"~oak/": "https://deno.land/x/oak@v12.1.0/",
-		"~zod": "https://deno.land/x/zod@v3.19.1/mod.ts",
-		"~trpc-server": "https://esm.sh/@trpc/server@10.11.0?dev",
-		"~trpc-server/": "https://esm.sh/@trpc/server@10.11.0/"
+		"std/": "https://deno.land/std@0.181.0/",
+		"oak/": "https://deno.land/x/oak@v12.1.0/",
+		"zod": "https://deno.land/x/zod@v3.19.1/mod.ts",
+		"@trpc/server": "https://esm.sh/@trpc/server@10.11.0",
+		"@trpc/server/": "https://esm.sh/@trpc/server@10.11.0/"
 	},
 	"fmt": {
 		"options": {
