@@ -11,7 +11,6 @@ import { podPlugins } from '@quazipanacea/pack-core/_server.ts'
 export async function init() {
 	const dataDir = util.getDataDir()
 	await Deno.mkdir(dataDir, { recursive: true })
-
 	// Ensure a one to one correspondence from pod.json to directory structure
 	{
 		const podsJsonFile = utilResource.getPodsJsonFile()
@@ -19,11 +18,9 @@ export async function init() {
 		if (podsJson.pods) {
 			for (const uuid in podsJson.pods) {
 				if (!Object.hasOwn(podsJson.pods, uuid)) continue
-
 				const filepath = utilResource.getPodDir(uuid)
 				try {
 					await Deno.stat(filepath)
-
 					if ((await dircount(Deno.readDir(filepath))).length == 0) {
 						console.log(
 							`in pods.json, and in FS, but empty, so removing everywhere: ${filepath}`,
@@ -41,14 +38,12 @@ export async function init() {
 					}
 				}
 			}
-
 			await Deno.writeTextFile(
 				podsJsonFile,
 				JSON.stringify(podsJson, null, '\t'),
 			)
 		}
 	}
-
 	// Ensure a one to one correspondence from directory to pod.json
 	{
 		const podsJsonFile = utilResource.getPodsJsonFile()
@@ -60,11 +55,9 @@ export async function init() {
 		}
 		for await (const dir of Deno.readDir(podDir)) {
 			const firstTwo = dir.name
-
 			for await (const rest of Deno.readDir(path.join(podDir, firstTwo))) {
 				const finalpath = path.join(podDir, firstTwo, rest.name)
 				const uuid = `${firstTwo}${rest.name}`
-
 				if (!podsJson.pods[uuid]) {
 					if ((await dircount(Deno.readDir(finalpath))).length == 0) {
 						await Deno.remove(finalpath)
@@ -77,25 +70,25 @@ export async function init() {
 		}
 	}
 }
-
 async function dircount<T>(
 	source: AsyncIterable<T> | Iterable<T>,
 ): Promise<T[]> {
 	const arr = []
-
 	for await (const entry of source) {
 		arr.push(entry)
 	}
-
 	return arr
 }
 
 // trpc router
 const getTrpcRouter = (pluginId: string): any => {
 	for (const podPlugin of podPlugins) {
-		console.log(podPlugin)
-		throw new Error('podPlugin')
+		if (podPlugin.metadata.id === pluginId) {
+			return podPlugin.trpcRouter
+		}
 	}
+
+	throw new Error(`Failed to find pod plugin that matches id ${pluginId}`)
 }
 export const appRouter = trpc.router({
 	core: coreRouter,
@@ -112,9 +105,12 @@ export type AppRouter = typeof appRouter
 // api router
 const getOakRouter = (pluginId: string) => {
 	for (const podPlugin of podPlugins) {
-		console.log(podPlugin)
-		throw new Error('podPlugin')
+		if (podPlugin.metadata.id === pluginId) {
+			return podPlugin.oakRouter
+		}
 	}
+
+	throw new Error(`Failed to find pod plugin that matches id ${pluginId}`)
 }
 export const apiRouter = new Router()
 	.use(
@@ -123,7 +119,7 @@ export const apiRouter = new Router()
 			.use(
 				'/pod',
 				new Router()
-					.use('/latex', oakLatexRouter.routes())
+					.use('/latex', getOakRouter('latex').routes())
 
 					.get('/(.*)', (ctx) => {
 						ctx.response.status = Status.NotFound

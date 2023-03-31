@@ -1,8 +1,6 @@
-// import { Application, Router, fetchRequestHandler } from '@server/mod.ts'
-import { Application, Router } from '@server/mod.ts'
+import { Application, Router, fetchRequestHandler } from '@server/mod.ts'
 
-// import { init, createContext, appRouter, apiRouter } from '@server/init.ts'
-import { init, apiRouter } from '@server/init.ts'
+import { init, createContext, appRouter, apiRouter } from '@server/init.ts'
 import {
 	handleErrors,
 	handleLogs,
@@ -20,28 +18,28 @@ router.use(handleLogs)
 router.use(handleAssets)
 
 // trpc
-// router.all('/trpc/(.*)', async (ctx) => {
-// 	const res = await fetchRequestHandler({
-// 		endpoint: '/trpc',
-// 		req: new Request(ctx.request.url, {
-// 			headers: ctx.request.headers,
-// 			body:
-// 				ctx.request.method !== 'GET' && ctx.request.method !== 'HEAD'
-// 					? ctx.request.body({ type: 'stream' }).value
-// 					: void 0,
-// 			method: ctx.request.method,
-// 		}),
-// 		router: appRouter,
-// 		createContext,
-// 		onError({ error }) {
-// 			console.error(error)
-// 		},
-// 	})
+router.all('/trpc/(.*)', async (ctx) => {
+	const res = await fetchRequestHandler({
+		endpoint: '/trpc',
+		req: new Request(ctx.request.url, {
+			headers: ctx.request.headers,
+			body:
+				ctx.request.method !== 'GET' && ctx.request.method !== 'HEAD'
+					? ctx.request.body({ type: 'stream' }).value
+					: void 0,
+			method: ctx.request.method,
+		}),
+		router: appRouter,
+		createContext,
+		onError({ error }) {
+			console.error(error)
+		},
+	})
 
-// 	ctx.response.status = res.status
-// 	ctx.response.headers = res.headers
-// 	ctx.response.body = res.body
-// })
+	ctx.response.status = res.status
+	ctx.response.headers = res.headers
+	ctx.response.body = res.body
+})
 
 router.use('/api', apiRouter.routes())
 router.use('/api', apiRouter.allowedMethods())

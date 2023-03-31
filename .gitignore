@@ -4,3 +4,4 @@ public/
 build/
 .vscode/
 dependencies/
+node_modules/
