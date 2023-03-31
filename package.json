@@ -1,0 +1,23 @@
+{
+	"name": "@quazipanacea/server-deno",
+	"private": true,
+	"dependencies": {
+		"@quazipanacea/common": "workspace:*",
+		"@quazipanacea/plugin-components": "workspace:*",
+		"@quazipanacea/plugin-utility": "workspace:*",
+		"@quazipanacea/pack-core": "workspace:*",
+		"@quazipanacea/cover-list": "workspace:*",
+		"@quazipanacea/cover-markmap": "workspace:*",
+		"@quazipanacea/group-line": "workspace:*",
+		"@quazipanacea/overview-by-group": "workspace:*",
+		"@quazipanacea/overview-debug": "workspace:*",
+		"@quazipanacea/overview-graph-cytoscape": "workspace:*",
+		"@quazipanacea/overview-graph-vis": "workspace:*",
+		"@quazipanacea/overview-mindelixir": "workspace:*",
+		"@quazipanacea/pod-chemical": "workspace:*",
+		"@quazipanacea/pod-debug": "workspace:*",
+		"@quazipanacea/pod-latex": "workspace:*",
+		"@quazipanacea/pod-markdown": "workspace:*",
+		"@quazipanacea/pod-plaintext": "workspace:*"
+	}
+}

@@ -3,3 +3,4 @@ output/
 public/
 build/
 .vscode/
+dependencies/

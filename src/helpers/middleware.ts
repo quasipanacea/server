@@ -1,26 +1,26 @@
-import { Context, Status, send, path } from "@src/mod.ts";
+import { Context, Status, send } from '@server/mod.ts'
 
-import * as util from "@src/util/util.ts";
-import { JSONError } from "@src/util/util.ts";
+import * as util from '@quazipanacea/common/util.ts'
+import { JSONError } from '@quazipanacea/common/util2.ts'
 
-type Next = () => Promise<unknown>; // TODO
+type Next = () => Promise<unknown> // TODO
 
 export async function handleErrors({ response }: Context, next: Next) {
 	try {
-		await next();
+		await next()
 	} catch (err: unknown) {
-		console.log(err);
+		console.log(err)
 
-		response.status = Status.InternalServerError;
-		response.headers.set("Content-Type", "application/json");
+		response.status = Status.InternalServerError
+		response.headers.set('Content-Type', 'application/json')
 
-		let bodyError;
+		let bodyError
 		if (err instanceof JSONError) {
-			bodyError = err.obj;
+			bodyError = err.obj
 		} else if (err instanceof Error) {
-			bodyError = err.message;
+			bodyError = err.message
 		} else {
-			bodyError = err;
+			bodyError = err
 		}
 
 		response.body = JSON.stringify(
@@ -28,30 +28,30 @@ export async function handleErrors({ response }: Context, next: Next) {
 				error: bodyError,
 			},
 			null,
-			"\t"
-		);
+			'\t',
+		)
 	}
 }
 
 export async function handleLogs({ request: req }: Context, next: Next) {
-	console.log(`${req.method} ${req.url.pathname}`);
-	await next();
+	console.log(`${req.method} ${req.url.pathname}`)
+	await next()
 }
 
 export async function handleAssets(ctx: Context, next: Next) {
-	const pathname = ctx.request.url.pathname;
+	const pathname = ctx.request.url.pathname
 
-	if (pathname.startsWith("/assets")) {
+	if (pathname.startsWith('/assets')) {
 		await send(ctx, pathname, {
-			root: util.get_public_dir(),
-		});
+			root: util.getPublicDir(),
+		})
 	} else {
-		await next();
+		await next()
 	}
 }
 
 export async function handle404(ctx: Context) {
-	await send(ctx, "index.html", {
-		root: util.get_public_dir(),
-	});
+	await send(ctx, 'index.html', {
+		root: util.getPublicDir(),
+	})
 }
