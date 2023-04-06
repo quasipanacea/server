@@ -9,7 +9,6 @@
 		"@quasipanacea/overview-by-group": "workspace:*",
 		"@quasipanacea/overview-debug": "workspace:*",
 		"@quasipanacea/overview-graph-cytoscape": "workspace:*",
-		"@quasipanacea/overview-graph-vis": "workspace:*",
 		"@quasipanacea/overview-mindelixir": "workspace:*",
 		"@quasipanacea/pack-core": "workspace:*",
 		"@quasipanacea/plugin-components": "workspace:*",
