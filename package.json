@@ -3,8 +3,8 @@
 	"private": true,
 	"dependencies": {
 		"@quasipanacea/common": "workspace:*",
-		"@quasipanacea/cover-list": "workspace:*",
-		"@quasipanacea/cover-markmap": "workspace:*",
+		"@quasipanacea/view-list": "workspace:*",
+		"@quasipanacea/view-markmap": "workspace:*",
 		"@quasipanacea/group-line": "workspace:*",
 		"@quasipanacea/overview-by-group": "workspace:*",
 		"@quasipanacea/overview-debug": "workspace:*",
