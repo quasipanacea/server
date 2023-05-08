@@ -17,7 +17,6 @@ export async function init() {
 		const podsJson = await utilResource.getPodsJson()
 		if (podsJson.pods) {
 			for (const uuid in podsJson.pods) {
-				if (!Object.hasOwn(podsJson.pods, uuid)) continue
 				const filepath = utilResource.getPodDir(uuid)
 				try {
 					await Deno.stat(filepath)
