@@ -1,10 +1,10 @@
 import { path, fs, Router, Status } from '@server/mod.ts'
 
-import * as util from '@quasipanacea/common/util.ts'
-import * as utilResource from '@quasipanacea/common/utilResource.ts'
-import { trpc } from '@quasipanacea/common/trpc.ts'
+import * as util from '@quasipanacea/common/server/util.ts'
+import * as utilResource from '@quasipanacea/common/server/utilResource.ts'
+import { trpc } from '@quasipanacea/common/server/trpc.ts'
 import { coreRouter } from '@quasipanacea/common/routes.ts'
-export { createContext } from '@quasipanacea/common/trpc.ts'
+export { createContext } from '@quasipanacea/common/server/trpc.ts'
 
 import { podPlugins } from '@quasipanacea/pack-core/_server.ts'
 

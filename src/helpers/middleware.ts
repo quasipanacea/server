@@ -1,7 +1,7 @@
 import { Context, Status, send } from '@server/mod.ts'
 
-import * as util from '@quasipanacea/common/util.ts'
-import { JSONError } from '@quasipanacea/common/util.ts'
+import * as util from '@quasipanacea/common/server/util.ts'
+import { JSONError } from '@quasipanacea/common/server/util.ts'
 
 type Next = () => Promise<unknown> // TODO
 
