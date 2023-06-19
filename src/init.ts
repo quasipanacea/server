@@ -1,14 +1,24 @@
-import { path, fs, Router, Status } from '@server/mod.ts'
+import { path, fs, Router, Status, ProcedureRouterRecord } from '@server/mod.ts'
 
-import * as util from '@quasipanacea/common/server/util.ts'
-import * as utilResource from '@quasipanacea/common/server/utilResource.ts'
-import { trpc } from '@quasipanacea/common/server/trpc.ts'
 import { coreRouter } from '@quasipanacea/common/routes.ts'
 export { createContext } from '@quasipanacea/common/server/trpc.ts'
+import { util, utilResource } from '@quasipanacea/common/server/index.ts'
+import { trpc } from '@quasipanacea/common/server/trpc.ts'
+import { getPlugin } from '@quasipanacea/common/server/plugin.ts'
 
-import { podPlugins } from '@quasipanacea/pack-core/_server.ts'
+import { initAll } from '@quasipanacea/pack-core/_server.ts'
 
-export async function init() {
+export async function validateSystem() {
+	async function dircount<T>(
+		source: AsyncIterable<T> | Iterable<T>,
+	): Promise<T[]> {
+		const arr = []
+		for await (const entry of source) {
+			arr.push(entry)
+		}
+		return arr
+	}
+
 	const dataDir = util.getDataDir()
 	await Deno.mkdir(dataDir, { recursive: true })
 	// Ensure a one to one correspondence from pod.json to directory structure
@@ -69,70 +79,61 @@ export async function init() {
 		}
 	}
 }
-async function dircount<T>(
-	source: AsyncIterable<T> | Iterable<T>,
-): Promise<T[]> {
-	const arr = []
-	for await (const entry of source) {
-		arr.push(entry)
-	}
-	return arr
+
+export async function initializePlugins() {
+	await initAll()
 }
 
-// trpc router
-const getTrpcRouter = (pluginId: string): any => {
-	for (const podPlugin of podPlugins) {
-		if (podPlugin.metadata.id === pluginId) {
-			return podPlugin.trpcRouter
+export function yieldTrpcRouter() {
+	const podRoutes: ProcedureRouterRecord = {}
+	for (const id of ['markdown', 'plaintext', 'latex']) {
+		const router = getPlugin('pod', id).trpcRouter
+		if (router) {
+			podRoutes[id] = router
 		}
 	}
 
-	throw new Error(`Failed to find pod plugin that matches id ${pluginId}`)
-}
-export const appRouter = trpc.router({
-	core: coreRouter,
-	plugins: trpc.router({
-		pods: trpc.router({
-			markdown: getTrpcRouter('markdown'),
-			plaintext: getTrpcRouter('plaintext'),
-			latex: getTrpcRouter('latex'),
+	const trpcRouter = trpc.router({
+		core: coreRouter,
+		plugins: trpc.router({
+			pods: trpc.router(podRoutes),
 		}),
-	}),
-})
-export type AppRouter = typeof appRouter
+	})
 
-// api router
-const getOakRouter = (pluginId: string) => {
-	for (const podPlugin of podPlugins) {
-		if (podPlugin.metadata.id === pluginId) {
-			return podPlugin.oakRouter
-		}
+	return trpcRouter
+}
+
+export function yieldOakRouter() {
+	const latexRouter = getPlugin('pod', 'latex').oakRouter
+	if (!latexRouter) {
+		throw new Error('latexRouter not defined')
 	}
 
-	throw new Error(`Failed to find pod plugin that matches id ${pluginId}`)
-}
-export const apiRouter = new Router()
-	.use(
-		'/plugins',
-		new Router()
-			.use(
-				'/pod',
-				new Router()
-					.use('/latex', getOakRouter('latex').routes())
+	const apiRouter = new Router()
+		.use(
+			'/plugins',
+			new Router()
+				.use(
+					'/pod',
+					new Router()
+						.use('/latex', latexRouter.routes())
 
-					.get('/(.*)', (ctx) => {
-						ctx.response.status = Status.NotFound
-						ctx.response.body = 'Failed to find plugin route\n'
-					})
-					.routes(),
-			)
-			.get('/(.*)', (ctx) => {
-				ctx.response.status = Status.NotFound
-				ctx.response.body = 'Plugin not found\n'
-			})
-			.routes(),
-	)
-	.get('/(.*)', (ctx) => {
-		ctx.response.status = Status.NotFound
-		ctx.response.body = 'Failed to find API route\n'
-	})
+						.get('/(.*)', (ctx) => {
+							ctx.response.status = Status.NotFound
+							ctx.response.body = 'Failed to find plugin route\n'
+						})
+						.routes(),
+				)
+				.get('/(.*)', (ctx) => {
+					ctx.response.status = Status.NotFound
+					ctx.response.body = 'Plugin not found\n'
+				})
+				.routes(),
+		)
+		.get('/(.*)', (ctx) => {
+			ctx.response.status = Status.NotFound
+			ctx.response.body = 'Failed to find API route\n'
+		})
+
+	return apiRouter
+}
