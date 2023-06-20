@@ -8,7 +8,7 @@ import {
 	trpcServer,
 } from '@quasipanacea/common/server/index.ts'
 
-import { initAll } from '@quasipanacea/pack-core/_server.ts'
+import { initAll } from '@quasipanacea/plugin-pack-core/_server.ts'
 
 export async function validateSystem() {
 	async function dircount<T>(

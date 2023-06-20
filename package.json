@@ -3,18 +3,18 @@
 	"private": true,
 	"dependencies": {
 		"@quasipanacea/common": "workspace:*",
-		"@quasipanacea/overview-debug": "workspace:*",
-		"@quasipanacea/overview-mindelixir": "workspace:*",
-		"@quasipanacea/pack-core": "workspace:*",
-		"@quasipanacea/plugin-components": "workspace:*",
+		"@quasipanacea/plugin-overview-debug": "workspace:*",
+		"@quasipanacea/plugin-overview-mindelixir": "workspace:*",
+		"@quasipanacea/plugin-pack-core": "workspace:*",
+		"@quasipanacea/components": "workspace:*",
 		"@quasipanacea/plugin-utility": "workspace:*",
-		"@quasipanacea/pod-chemical": "workspace:*",
-		"@quasipanacea/pod-debug": "workspace:*",
-		"@quasipanacea/pod-latex": "workspace:*",
-		"@quasipanacea/pod-markdown": "workspace:*",
-		"@quasipanacea/pod-milkdown": "workspace:^",
-		"@quasipanacea/pod-plaintext": "workspace:*",
-		"@quasipanacea/view-list": "workspace:*",
-		"@quasipanacea/view-markmap": "workspace:*"
+		"@quasipanacea/plugin-pod-chemical": "workspace:*",
+		"@quasipanacea/plugin-pod-debug": "workspace:*",
+		"@quasipanacea/plugin-pod-latex": "workspace:*",
+		"@quasipanacea/plugin-pod-markdown": "workspace:*",
+		"@quasipanacea/plugin-pod-milkdown": "workspace:^",
+		"@quasipanacea/plugin-pod-plaintext": "workspace:*",
+		"@quasipanacea/plugin-view-list": "workspace:*",
+		"@quasipanacea/plugin-view-markmap": "workspace:*"
 	}
 }
