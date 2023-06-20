@@ -1,6 +1,13 @@
 import { Application, Router, fetchRequestHandler } from '@server/mod.ts'
 
-import { validateSystem, initializePlugins, createContext, yieldTrpcRouter, yieldOakRouter } from '@server/init.ts'
+import { trpcServer } from '@quasipanacea/common/server/index.ts'
+
+import {
+	validateSystem,
+	initializePlugins,
+	yieldTrpcRouter,
+	yieldOakRouter,
+} from '@server/init.ts'
 import {
 	handleErrors,
 	handleLogs,
@@ -30,7 +37,7 @@ router.all('/trpc/(.*)', async (ctx) => {
 			method: ctx.request.method,
 		}),
 		router: yieldTrpcRouter(),
-		createContext,
+		createContext: trpcServer.createContext,
 		onError({ error }) {
 			console.error(error)
 		},

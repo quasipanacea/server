@@ -1,7 +1,6 @@
 import { Context, Status, send } from '@server/mod.ts'
 
-import * as util from '@quasipanacea/common/server/util.ts'
-import { JSONError } from '@quasipanacea/common/server/util.ts'
+import { util } from '@quasipanacea/common/server/index.ts'
 
 type Next = () => Promise<unknown> // TODO
 
@@ -15,7 +14,7 @@ export async function handleErrors({ response }: Context, next: Next) {
 		response.headers.set('Content-Type', 'application/json')
 
 		let bodyError
-		if (err instanceof JSONError) {
+		if (err instanceof util.JSONError) {
 			bodyError = err.obj
 		} else if (err instanceof Error) {
 			bodyError = err.message

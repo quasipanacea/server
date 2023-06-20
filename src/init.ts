@@ -1,10 +1,12 @@
 import { path, fs, Router, Status, ProcedureRouterRecord } from '@server/mod.ts'
 
-import { coreRouter } from '@quasipanacea/common/routes.ts'
-export { createContext } from '@quasipanacea/common/server/trpc.ts'
-import { util, utilResource } from '@quasipanacea/common/server/index.ts'
-import { trpc } from '@quasipanacea/common/server/trpc.ts'
-import { getPlugin } from '@quasipanacea/common/server/plugin.ts'
+import { coreRouter } from '@quasipanacea/common/index.ts'
+import {
+	plugin,
+	util,
+	utilResource,
+	trpcServer,
+} from '@quasipanacea/common/server/index.ts'
 
 import { initAll } from '@quasipanacea/pack-core/_server.ts'
 
@@ -87,16 +89,16 @@ export async function initializePlugins() {
 export function yieldTrpcRouter() {
 	const podRoutes: ProcedureRouterRecord = {}
 	for (const id of ['markdown', 'plaintext', 'latex']) {
-		const router = getPlugin('pod', id).trpcRouter
+		const router = plugin.get('pod', id).trpcRouter
 		if (router) {
 			podRoutes[id] = router
 		}
 	}
 
-	const trpcRouter = trpc.router({
+	const trpcRouter = trpcServer.instance.router({
 		core: coreRouter,
-		plugins: trpc.router({
-			pods: trpc.router(podRoutes),
+		plugins: trpcServer.instance.router({
+			pods: trpcServer.instance.router(podRoutes),
 		}),
 	})
 
@@ -104,7 +106,7 @@ export function yieldTrpcRouter() {
 }
 
 export function yieldOakRouter() {
-	const latexRouter = getPlugin('pod', 'latex').oakRouter
+	const latexRouter = plugin.get('pod', 'latex').oakRouter
 	if (!latexRouter) {
 		throw new Error('latexRouter not defined')
 	}
