@@ -3,8 +3,6 @@
 	"private": true,
 	"dependencies": {
 		"@quasipanacea/common": "workspace:*",
-		"@quasipanacea/view-list": "workspace:*",
-		"@quasipanacea/view-markmap": "workspace:*",
 		"@quasipanacea/overview-debug": "workspace:*",
 		"@quasipanacea/overview-mindelixir": "workspace:*",
 		"@quasipanacea/pack-core": "workspace:*",
@@ -14,6 +12,9 @@
 		"@quasipanacea/pod-debug": "workspace:*",
 		"@quasipanacea/pod-latex": "workspace:*",
 		"@quasipanacea/pod-markdown": "workspace:*",
-		"@quasipanacea/pod-plaintext": "workspace:*"
+		"@quasipanacea/pod-milkdown": "workspace:^",
+		"@quasipanacea/pod-plaintext": "workspace:*",
+		"@quasipanacea/view-list": "workspace:*",
+		"@quasipanacea/view-markmap": "workspace:*"
 	}
 }
