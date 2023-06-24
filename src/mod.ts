@@ -13,4 +13,11 @@ export { type Middleware } from 'oak/middleware.ts'
 export { z } from 'zod'
 export { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 export type { inferProcedureInput, inferProcedureOutput } from '@trpc/server'
-export { TRPCError, type AnyProcedure, type AnyRouter, type ProcedureRouterRecord } from '@trpc/server'
+export {
+	TRPCError,
+	type AnyProcedure,
+	type AnyRouter,
+	type ProcedureRouterRecord,
+} from '@trpc/server'
+
+export { default as _ } from 'lodash'

@@ -86,6 +86,37 @@ export async function initializePlugins() {
 	await initAll()
 }
 
+export async function updateIndex() {
+	// Index pods
+	{
+		const allFormats: Record<string, string[]> = {}
+
+		const podsJson = await utilResource.getPodsJson()
+		for (const uuid in podsJson.pods) {
+			const pod = podsJson.pods[uuid]
+
+			if (!allFormats[pod.format]) {
+				allFormats[pod.format] = []
+			}
+		}
+
+		const plugins = plugin.list('pod')
+		for (const [id, p] of plugins.entries()) {
+			if (allFormats[p.metadata.forFormat]) {
+				allFormats[p.metadata.forFormat].push(id)
+			} else {
+				allFormats[p.metadata.forFormat] = [id]
+			}
+		}
+
+		const indexJson = await utilResource.getIndexJson()
+		indexJson.formats = allFormats
+
+		const indexJsonFile = utilResource.getIndexJsonFile()
+		await Deno.writeTextFile(indexJsonFile, util.jsonStringify(indexJson))
+	}
+}
+
 export function yieldTrpcRouter() {
 	const podRoutes: ProcedureRouterRecord = {}
 	for (const id of ['markdown', 'plaintext', 'latex']) {

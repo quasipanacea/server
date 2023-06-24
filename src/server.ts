@@ -5,6 +5,7 @@ import { trpcServer } from '@quasipanacea/common/server/index.ts'
 import {
 	validateSystem,
 	initializePlugins,
+	updateIndex,
 	yieldTrpcRouter,
 	yieldOakRouter,
 } from '@server/init.ts'
@@ -17,6 +18,7 @@ import {
 
 await validateSystem()
 await initializePlugins()
+await updateIndex()
 
 const app = new Application()
 const router = new Router()

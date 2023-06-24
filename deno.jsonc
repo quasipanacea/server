@@ -6,7 +6,8 @@
 		"oak/": "https://deno.land/x/oak@v12.1.0/",
 		"zod": "https://deno.land/x/zod@v3.21.4/mod.ts",
 		"@trpc/server": "https://esm.sh/@trpc/server@10.11.0",
-		"@trpc/server/": "https://esm.sh/@trpc/server@10.11.0/"
+		"@trpc/server/": "https://esm.sh/@trpc/server@10.11.0/",
+		"lodash": "https://esm.sh/lodash@4.17.21"
 	},
 	"fmt": {
 		"options": {
