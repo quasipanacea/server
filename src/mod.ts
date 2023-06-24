@@ -7,7 +7,7 @@ export { Status } from 'std/http/http_status.ts'
 export { serve } from 'std/http/server.ts'
 
 export { Application, Router, Context, send } from 'oak/mod.ts'
-export { helpers } from 'oak/mod.ts'
+export { helpers, type Next } from 'oak/mod.ts'
 export { type Middleware } from 'oak/middleware.ts'
 
 export { z } from 'zod'

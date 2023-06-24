@@ -9,6 +9,7 @@ import {
 } from '@quasipanacea/common/server/index.ts'
 
 import { initAll } from '@quasipanacea/plugin-pack-core/_server.ts'
+import { instance } from '../dependencies/@quasipanacea/common/server/trpcServer.ts'
 
 export async function validateSystem() {
 	async function dircount<T>(
@@ -57,13 +58,19 @@ export async function validateSystem() {
 	}
 	// Ensure a one to one correspondence from directory to pod.json
 	{
-		const podsJsonFile = utilResource.getPodsJsonFile()
 		const podsJson = await utilResource.getPodsJson()
 		const podDir = utilResource.getPodsDir()
-		// TODO
-		if (!(await fs.exists(podDir))) {
-			return
+
+		try {
+			await Deno.stat(podDir)
+		} catch (err) {
+			if (err instanceof Deno.errors.NotFound) {
+				return
+			} else {
+				throw err
+			}
 		}
+
 		for await (const dir of Deno.readDir(podDir)) {
 			const firstTwo = dir.name
 			for await (const rest of Deno.readDir(path.join(podDir, firstTwo))) {
@@ -72,9 +79,34 @@ export async function validateSystem() {
 				if (!podsJson.pods[uuid]) {
 					if ((await dircount(Deno.readDir(finalpath))).length == 0) {
 						await Deno.remove(finalpath)
-						await Deno.remove(path.dirname(finalpath))
+						if ((await dircount(path.dirname(finalpath))).length == 1) {
+							await Deno.remove(path.dirname(finalpath))
+						}
 					} else {
-						console.log(`in FS, but not in pods.json: ${finalpath}`)
+						let allFilesEmpty = true
+						for await (const file of Deno.readDir(finalpath)) {
+							if (!file.isFile) {
+								allFilesEmpty = false
+								continue
+							}
+
+							const content = await Deno.readTextFile(
+								path.join(finalpath, file.name),
+							)
+							if (content.length !== 0) {
+								allFilesEmpty = false
+								continue
+							}
+						}
+
+						if (allFilesEmpty) {
+							await Deno.remove(finalpath, { recursive: true })
+							if ((await dircount(path.dirname(finalpath))).length == 1) {
+								await Deno.remove(path.dirname(finalpath))
+							}
+						} else {
+							console.log(`in FS, but not in pods.json: ${finalpath}`)
+						}
 					}
 				}
 			}

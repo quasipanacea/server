@@ -1,8 +1,6 @@
-import { Context, Status, send } from '@server/mod.ts'
+import { Context, Status, Next, send } from '@server/mod.ts'
 
 import { util } from '@quasipanacea/common/server/index.ts'
-
-type Next = () => Promise<unknown> // TODO
 
 export async function handleErrors({ response }: Context, next: Next) {
 	try {
