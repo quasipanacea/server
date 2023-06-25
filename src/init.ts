@@ -1,4 +1,12 @@
-import { path, fs, Router, Status, ProcedureRouterRecord } from '@server/mod.ts'
+import {
+	path,
+	fs,
+	Router,
+	Status,
+	ProcedureRouterRecord,
+	Context,
+	colors,
+} from '@server/mod.ts'
 
 import { coreRouter } from '@quasipanacea/common/index.ts'
 import {
@@ -150,55 +158,66 @@ export async function updateIndex() {
 }
 
 export function yieldTrpcRouter() {
-	const podRoutes: ProcedureRouterRecord = {}
-	for (const id of ['markdown', 'plaintext', 'latex']) {
-		const router = plugin.get('pod', id).trpcRouter
-		if (router) {
-			podRoutes[id] = router
+	const createPluginsRouter = () => {
+		const procedures: ProcedureRouterRecord = {}
+
+		console.log(`${colors.magenta('Loading tRPC routes...')}`)
+		for (const pluginType of plugin.getFamilies()) {
+			const subprocedures: ProcedureRouterRecord = {}
+
+			const plugins = plugin.list(pluginType)
+			for (const [pluginId, pluginModule] of plugins.entries()) {
+				const router = pluginModule.trpcRouter
+				if (router) {
+					subprocedures[pluginId] = router
+				}
+				console.log(`${colors.yellow('plugin')}: ${pluginType}.${pluginId}`)
+			}
+
+			procedures[pluginType] = trpcServer.instance.router(subprocedures)
 		}
+
+		return trpcServer.instance.router(procedures)
 	}
 
-	const trpcRouter = trpcServer.instance.router({
+	return trpcServer.instance.router({
 		core: coreRouter,
-		plugins: trpcServer.instance.router({
-			pods: trpcServer.instance.router(podRoutes),
-		}),
+		plugins: createPluginsRouter(),
 	})
-
-	return trpcRouter
 }
 
 export function yieldOakRouter() {
-	const latexRouter = plugin.get('pod', 'latex').oakRouter
-	if (!latexRouter) {
-		throw new Error('latexRouter not defined')
+	const handle404 = (ctx: Context) => {
+		ctx.response.status = Status.NotFound
+		ctx.response.body = 'Plugin not found\n'
 	}
 
-	const apiRouter = new Router()
-		.use(
-			'/plugins',
-			new Router()
-				.use(
-					'/pod',
-					new Router()
-						.use('/latex', latexRouter.routes())
+	const createPluginsRouter = () => {
+		const router = new Router()
 
-						.get('/(.*)', (ctx) => {
-							ctx.response.status = Status.NotFound
-							ctx.response.body = 'Failed to find plugin route\n'
-						})
-						.routes(),
-				)
-				.get('/(.*)', (ctx) => {
-					ctx.response.status = Status.NotFound
-					ctx.response.body = 'Plugin not found\n'
-				})
-				.routes(),
-		)
-		.get('/(.*)', (ctx) => {
-			ctx.response.status = Status.NotFound
-			ctx.response.body = 'Failed to find API route\n'
-		})
+		console.log(`${colors.magenta('Loading Oak routes...')}`)
+		for (const pluginType of plugin.getFamilies()) {
+			const router1 = new Router()
 
-	return apiRouter
+			const pluginMap = plugin.list(pluginType)
+
+			for (const [pluginId, pluginModule] of pluginMap.entries()) {
+				if (pluginModule.oakRouter) {
+					router1.use(`/${pluginId}`, pluginModule.oakRouter.routes())
+					console.log(`${colors.yellow('plugin')}: ${pluginType}/${pluginId}`)
+				}
+			}
+
+			if (Array.from(router1.keys()).length > 0) {
+				router.use(`/${pluginType}`, router1.routes())
+				router.get('/(.*)', handle404)
+			}
+		}
+
+		return router
+	}
+
+	return new Router()
+		.use('/plugins', createPluginsRouter().routes())
+		.get('/(.*)', handle404)
 }

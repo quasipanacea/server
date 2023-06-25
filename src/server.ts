@@ -1,4 +1,9 @@
-import { Application, Router, fetchRequestHandler } from '@server/mod.ts'
+import {
+	Application,
+	Router,
+	fetchRequestHandler,
+	colors,
+} from '@server/mod.ts'
 
 import { trpcServer } from '@quasipanacea/common/server/index.ts'
 
@@ -23,6 +28,7 @@ await updateIndex()
 const app = new Application()
 const router = new Router()
 const oakRouter = yieldOakRouter()
+const trpcRouter = yieldTrpcRouter()
 
 router.use(handleErrors)
 router.use(handleLogs)
@@ -38,7 +44,7 @@ router.all('/trpc/(.*)', async (ctx) => {
 					: void 0,
 			method: ctx.request.method,
 		}),
-		router: yieldTrpcRouter(),
+		router: trpcRouter,
 		createContext: trpcServer.createContext,
 		onError({ error }) {
 			console.error(error)
@@ -56,6 +62,6 @@ router.get('/(.*)', handle404)
 app.use(router.routes())
 app.use(router.allowedMethods())
 app.addEventListener('listen', (ev) => {
-	console.info(`Listening on http://localhost:${ev.port}`)
+	console.info(`${colors.blue('Listening on')} http://localhost:${ev.port}`)
 })
 await app.listen({ port: 15_800 })

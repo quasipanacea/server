@@ -3,17 +3,18 @@
 	"private": true,
 	"dependencies": {
 		"@quasipanacea/common": "workspace:^",
+		"@quasipanacea/components": "workspace:^",
 		"@quasipanacea/plugin-overview-debug": "workspace:^",
+		"@quasipanacea/plugin-overview-graph": "workspace:^",
 		"@quasipanacea/plugin-overview-mindelixir": "workspace:^",
 		"@quasipanacea/plugin-pack-core": "workspace:^",
-		"@quasipanacea/components": "workspace:^",
-		"@quasipanacea/plugin-utility": "workspace:^",
 		"@quasipanacea/plugin-pod-chemical": "workspace:^",
 		"@quasipanacea/plugin-pod-debug": "workspace:^",
 		"@quasipanacea/plugin-pod-latex": "workspace:^",
 		"@quasipanacea/plugin-pod-markdown": "workspace:^",
 		"@quasipanacea/plugin-pod-milkdown": "workspace:^",
 		"@quasipanacea/plugin-pod-plaintext": "workspace:^",
+		"@quasipanacea/plugin-utility": "workspace:^",
 		"@quasipanacea/plugin-view-list": "workspace:^",
 		"@quasipanacea/plugin-view-markmap": "workspace:^"
 	}

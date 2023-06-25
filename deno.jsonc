@@ -10,11 +10,9 @@
 		"lodash": "https://esm.sh/lodash@4.17.21"
 	},
 	"fmt": {
-		"options": {
-			"semiColons": false,
-			"lineWidth": 90,
-			"indentWidth": 3,
-			"singleQuote": true
-		}
+		"semiColons": false,
+		"lineWidth": 90,
+		"indentWidth": 3,
+		"singleQuote": true
 	}
 }
