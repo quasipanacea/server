@@ -3,7 +3,6 @@
 	"private": true,
 	"dependencies": {
 		"@quasipanacea/common": "workspace:^",
-		"@quasipanacea/components": "workspace:^",
 		"@quasipanacea/plugin-overview-debug": "workspace:^",
 		"@quasipanacea/plugin-overview-graph": "workspace:^",
 		"@quasipanacea/plugin-overview-mindelixir": "workspace:^",
