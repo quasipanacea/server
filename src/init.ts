@@ -1,6 +1,5 @@
 import {
 	path,
-	fs,
 	Router,
 	Status,
 	ProcedureRouterRecord,
@@ -8,7 +7,8 @@ import {
 	colors,
 } from '@server/mod.ts'
 
-import { coreRouter } from '@quasipanacea/common/index.ts'
+import { coreRouter } from '@quasipanacea/common/routes.ts'
+import { t } from '@quasipanacea/common/index.ts'
 import {
 	plugin,
 	util,
@@ -17,7 +17,6 @@ import {
 } from '@quasipanacea/common/server/index.ts'
 
 import { initAll } from '@quasipanacea/plugin-pack-core/_server.ts'
-import { instance } from '../dependencies/@quasipanacea/common/server/trpcServer.ts'
 
 export async function validateSystem() {
 	async function dircount<T>(
@@ -166,7 +165,9 @@ export function yieldTrpcRouter() {
 			const subprocedures: ProcedureRouterRecord = {}
 
 			const plugins = plugin.list(pluginType)
-			for (const [pluginId, pluginModule] of plugins.entries()) {
+			for (let [pluginId, pluginModule] of plugins.entries()) {
+				pluginModule = pluginModule as t.AnyServerPlugin_t
+
 				const router = pluginModule.trpcRouter
 				if (router) {
 					subprocedures[pluginId] = router
