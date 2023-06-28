@@ -10,7 +10,7 @@ import {
 import { coreRouter } from '@quasipanacea/common/routes.ts'
 import { t } from '@quasipanacea/common/index.ts'
 import {
-	plugin,
+	pluginServer,
 	util,
 	utilResource,
 	trpcServer,
@@ -139,7 +139,7 @@ export async function updateIndex() {
 			}
 		}
 
-		const plugins = plugin.list('pod')
+		const plugins = pluginServer.list('pod')
 		for (const [id, p] of plugins.entries()) {
 			if (allFormats[p.metadata.forFormat]) {
 				allFormats[p.metadata.forFormat].push(id)
@@ -161,10 +161,10 @@ export function yieldTrpcRouter() {
 		const procedures: ProcedureRouterRecord = {}
 
 		console.log(`${colors.magenta('Loading tRPC routes...')}`)
-		for (const pluginType of plugin.getFamilies()) {
+		for (const pluginType of pluginServer.getFamilies()) {
 			const subprocedures: ProcedureRouterRecord = {}
 
-			const plugins = plugin.list(pluginType)
+			const plugins = pluginServer.list(pluginType)
 			for (let [pluginId, pluginModule] of plugins.entries()) {
 				pluginModule = pluginModule as t.AnyServerPlugin_t
 
@@ -197,10 +197,10 @@ export function yieldOakRouter() {
 		const router = new Router()
 
 		console.log(`${colors.magenta('Loading Oak routes...')}`)
-		for (const pluginType of plugin.getFamilies()) {
+		for (const pluginType of pluginServer.getFamilies()) {
 			const router1 = new Router()
 
-			const pluginMap = plugin.list(pluginType)
+			const pluginMap = pluginServer.list(pluginType)
 
 			for (const [pluginId, pluginModule] of pluginMap.entries()) {
 				if (pluginModule.oakRouter) {
