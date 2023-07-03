@@ -140,11 +140,11 @@ export async function updateIndex() {
 		}
 
 		const plugins = pluginServer.list('pod')
-		for (const [id, p] of plugins.entries()) {
-			if (allFormats[p.metadata.forFormat]) {
-				allFormats[p.metadata.forFormat].push(id)
+		for (const plugin of plugins) {
+			if (allFormats[plugin.metadata.forFormat]) {
+				allFormats[plugin.metadata.forFormat].push(plugin.metadata.id)
 			} else {
-				allFormats[p.metadata.forFormat] = [id]
+				allFormats[plugin.metadata.forFormat] = [plugin.metadata.id]
 			}
 		}
 
@@ -165,14 +165,13 @@ export function yieldTrpcRouter() {
 			const subprocedures: ProcedureRouterRecord = {}
 
 			const plugins = pluginServer.list(pluginType)
-			for (let [pluginId, pluginModule] of plugins.entries()) {
-				pluginModule = pluginModule as t.AnyServerPlugin_t
-
-				const router = pluginModule.trpcRouter
-				if (router) {
-					subprocedures[pluginId] = router
+			for (const plugin of plugins) {
+				if (plugin.trpcRouter) {
+					subprocedures[plugin.metadata.id] = plugin.trpcRouter
 				}
-				console.log(`${colors.yellow('plugin')}: ${pluginType}.${pluginId}`)
+				console.log(
+					`${colors.yellow('plugin')}: ${pluginType}.${plugin.metadata.id}`,
+				)
 			}
 
 			procedures[pluginType] = trpcServer.instance.router(subprocedures)
@@ -200,11 +199,10 @@ export function yieldOakRouter() {
 		for (const pluginType of pluginServer.getFamilies()) {
 			const router1 = new Router()
 
-			const pluginMap = pluginServer.list(pluginType)
-
-			for (const [pluginId, pluginModule] of pluginMap.entries()) {
-				if (pluginModule.oakRouter) {
-					router1.use(`/${pluginId}`, pluginModule.oakRouter.routes())
+			for (const plugin of pluginServer.list(pluginType)) {
+				const pluginId = plugin.metadata.id
+				if (plugin.oakRouter) {
+					router1.use(`/${pluginId}`, plugin.oakRouter.routes())
 					console.log(`${colors.yellow('plugin')}: ${pluginType}/${pluginId}`)
 				}
 			}
