@@ -1,9 +1,6 @@
-import {
-	Application,
-	Router,
-	fetchRequestHandler,
-	colors,
-} from '@server/mod.ts'
+import * as colors from 'std/fmt/colors.ts'
+import { Application, Router } from 'oak/mod.ts'
+import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
 import { trpcServer } from '@quasipanacea/common/server/index.ts'
 
@@ -13,13 +10,13 @@ import {
 	updateIndex,
 	yieldTrpcRouter,
 	yieldOakRouter,
-} from '@server/init.ts'
+} from './init.ts'
 import {
 	handleErrors,
 	handleLogs,
 	handleAssets,
 	handle404,
-} from '@server/helpers/middleware.ts'
+} from './helpers/middleware.ts'
 
 await validateSystem()
 await initializePlugins()
@@ -28,7 +25,7 @@ await updateIndex()
 const app = new Application()
 const router = new Router()
 const oakRouter = yieldOakRouter()
-const trpcRouter = yieldTrpcRouter()
+const trpcRouter = yieldTrpcRouter<trpcServer.Context>(trpcServer.instance)
 
 router.use(handleErrors)
 router.use(handleLogs)

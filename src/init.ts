@@ -1,19 +1,13 @@
-import {
-	path,
-	Router,
-	Status,
-	ProcedureRouterRecord,
-	Context,
-	colors,
-} from '@server/mod.ts'
+import * as path from 'std/path/mod.ts'
+import * as colors from 'std/fmt/colors.ts'
+import { Router, Status, Context } from 'oak/mod.ts'
+import { initTRPC, type ProcedureRouterRecord } from '@trpc/server'
 
 import { coreRouter } from '@quasipanacea/common/routes.ts'
-import { t } from '@quasipanacea/common/index.ts'
 import {
 	pluginServer,
 	util,
 	utilResource,
-	trpcServer,
 } from '@quasipanacea/common/server/index.ts'
 
 import { initAll } from '@quasipanacea/plugin-pack-core/_server.ts'
@@ -156,7 +150,13 @@ export async function updateIndex() {
 	}
 }
 
-export function yieldTrpcRouter() {
+export function yieldTrpcRouter<
+	// deno-lint-ignore ban-types
+	U extends object = object,
+	T extends ReturnType<
+		ReturnType<typeof initTRPC.context<U>>['create']
+	> = ReturnType<ReturnType<typeof initTRPC.context<U>>['create']>,
+>(trpcInstance: T) {
 	const createPluginsRouter = () => {
 		const procedures: ProcedureRouterRecord = {}
 
@@ -174,13 +174,13 @@ export function yieldTrpcRouter() {
 				)
 			}
 
-			procedures[pluginType] = trpcServer.instance.router(subprocedures)
+			procedures[pluginType] = trpcInstance.router(subprocedures)
 		}
 
-		return trpcServer.instance.router(procedures)
+		return trpcInstance.router(procedures)
 	}
 
-	return trpcServer.instance.router({
+	return trpcInstance.router({
 		core: coreRouter,
 		plugins: createPluginsRouter(),
 	})

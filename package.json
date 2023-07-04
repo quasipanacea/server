@@ -9,6 +9,8 @@
 		"@quasipanacea/plugin-pack-core": "workspace:^",
 		"@quasipanacea/plugin-pod-chemical": "workspace:^",
 		"@quasipanacea/plugin-pod-debug": "workspace:^",
+		"@quasipanacea/plugin-pod-excalidraw": "workspace:^",
+		"@quasipanacea/plugin-pod-flashcard": "workspace:^",
 		"@quasipanacea/plugin-pod-latex": "workspace:^",
 		"@quasipanacea/plugin-pod-markdown": "workspace:^",
 		"@quasipanacea/plugin-pod-milkdown": "workspace:^",

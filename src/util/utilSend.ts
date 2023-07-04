@@ -1,4 +1,5 @@
-import { Context, Status, z } from '@server/mod.ts'
+import { Context, Status } from 'oak/mod.ts'
+import { z } from 'zod'
 
 export function json(
 	ctx: Context,

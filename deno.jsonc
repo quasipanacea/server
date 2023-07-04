@@ -1,14 +1,14 @@
 {
 	"imports": {
-		"@server/": "./src/",
 		"@quasipanacea/": "./dependencies/@quasipanacea/",
-		"std/": "https://deno.land/std@0.181.0/",
+		"std/": "https://deno.land/std@0.192.0/",
 		"oak/": "https://deno.land/x/oak@v12.5.0/",
 		"zod": "https://deno.land/x/zod@v3.21.4/mod.ts",
-		"@trpc/server": "https://esm.sh/@trpc/server@10.32.0",
-		"@trpc/server/": "https://esm.sh/@trpc/server@10.32.0/",
+		"@trpc/server": "https://esm.sh/@trpc/server@10.33.0",
+		"@trpc/server/": "https://esm.sh/@trpc/server@10.33.0/",
 		"lodash": "https://esm.sh/lodash@4.17.21",
-		"type-fest": "https://esm.sh/type-fest@v3.12.0"
+		// TODO
+		"cytoscape": "https://esm.sh/cytoscape@3.25.0"
 	},
 	"fmt": {
 		"semiColons": false,

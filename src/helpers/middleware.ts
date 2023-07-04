@@ -1,4 +1,4 @@
-import { Context, Status, Next, send } from '@server/mod.ts'
+import { Context, Status, Next, send } from 'oak/mod.ts'
 
 import { util } from '@quasipanacea/common/server/index.ts'
 
