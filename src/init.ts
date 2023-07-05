@@ -120,34 +120,98 @@ export async function initializePlugins() {
 }
 
 export async function updateIndex() {
-	// Index pods
+	const podMimeOptions: Record<string, string[]> = {}
 	{
-		const allFormats: Record<string, string[]> = {}
-
 		const podsJson = await utilResource.getPodsJson()
 		for (const uuid in podsJson.pods) {
 			const pod = podsJson.pods[uuid]
 
-			if (!allFormats[pod.format]) {
-				allFormats[pod.format] = []
+			if (!podMimeOptions[pod.format]) {
+				podMimeOptions[pod.format] = []
 			}
 		}
 
 		const plugins = pluginServer.list('pod')
 		for (const plugin of plugins) {
-			if (allFormats[plugin.metadata.forFormat]) {
-				allFormats[plugin.metadata.forFormat].push(plugin.metadata.id)
+			if (podMimeOptions[plugin.metadata.format]) {
+				podMimeOptions[plugin.metadata.format].push(plugin.metadata.id)
 			} else {
-				allFormats[plugin.metadata.forFormat] = [plugin.metadata.id]
+				podMimeOptions[plugin.metadata.format] = [plugin.metadata.id]
+			}
+		}
+	}
+
+	const podviewMimeOptions: Record<string, string[]> = {}
+	{
+		const podsJson = await utilResource.getPodsJson()
+		for (const uuid in podsJson.pods) {
+			const pod = podsJson.pods[uuid]
+
+			if (!podviewMimeOptions[pod.format]) {
+				podviewMimeOptions[pod.format] = []
 			}
 		}
 
-		const indexJson = await utilResource.getIndexJson()
-		indexJson.formats = allFormats
-
-		const indexJsonFile = utilResource.getIndexJsonFile()
-		await Deno.writeTextFile(indexJsonFile, util.jsonStringify(indexJson))
+		const plugins = pluginServer.list('podview')
+		for (const plugin of plugins) {
+			if (podviewMimeOptions[plugin.metadata.format]) {
+				podviewMimeOptions[plugin.metadata.format].push(plugin.metadata.id)
+			} else {
+				podviewMimeOptions[plugin.metadata.format] = [plugin.metadata.id]
+			}
+		}
 	}
+
+	const modelMimeOptions: Record<string, string[]> = {}
+	{
+		const modelsJson = await utilResource.getModelsJson()
+		for (const uuid in modelsJson.models) {
+			const model = modelsJson.models[uuid]
+
+			if (!modelMimeOptions[model.format]) {
+				modelMimeOptions[model.format] = []
+			}
+		}
+
+		const plugins = pluginServer.list('model')
+		for (const plugin of plugins) {
+			if (modelMimeOptions[plugin.metadata.format]) {
+				modelMimeOptions[plugin.metadata.format].push(plugin.metadata.id)
+			} else {
+				modelMimeOptions[plugin.metadata.format] = [plugin.metadata.id]
+			}
+		}
+	}
+
+	const modelviewMimeOptions: Record<string, string[]> = {}
+	{
+		const modelsJson = await utilResource.getModelsJson()
+		for (const uuid in modelsJson.models) {
+			const model = modelsJson.models[uuid]
+
+			if (!modelviewMimeOptions[model.format]) {
+				modelviewMimeOptions[model.format] = []
+			}
+		}
+
+		const plugins = pluginServer.list('modelview')
+		for (const plugin of plugins) {
+			if (modelviewMimeOptions[plugin.metadata.format]) {
+				modelviewMimeOptions[plugin.metadata.format].push(plugin.metadata.id)
+			} else {
+				modelviewMimeOptions[plugin.metadata.format] = [plugin.metadata.id]
+			}
+		}
+	}
+
+	const indexJson = await utilResource.getIndexJson()
+	indexJson.podMimeOptions = podMimeOptions
+	indexJson.podviewMimeOptions = podviewMimeOptions
+	indexJson.modelMimeOptions = modelMimeOptions
+	indexJson.modelviewMimeOptions = modelviewMimeOptions
+
+	const indexJsonFile = utilResource.getIndexJsonFile()
+	await Deno.writeTextFile(indexJsonFile, util.jsonStringify(indexJson))
 }
 
 export function yieldTrpcRouter<
@@ -168,10 +232,10 @@ export function yieldTrpcRouter<
 			for (const plugin of plugins) {
 				if (plugin.trpcRouter) {
 					subprocedures[plugin.metadata.id] = plugin.trpcRouter
+					console.log(
+						`${colors.yellow('plugin')}: ${pluginType}.${plugin.metadata.id}`,
+					)
 				}
-				console.log(
-					`${colors.yellow('plugin')}: ${pluginType}.${plugin.metadata.id}`,
-				)
 			}
 
 			procedures[pluginType] = trpcInstance.router(subprocedures)
