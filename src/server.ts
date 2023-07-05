@@ -5,9 +5,9 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 import { trpcServer } from '@quasipanacea/common/server/index.ts'
 
 import {
-	validateSystem,
+	initializeSystem,
 	initializePlugins,
-	updateIndex,
+	initializeIndex,
 	yieldTrpcRouter,
 	yieldOakRouter,
 } from './init.ts'
@@ -16,11 +16,11 @@ import {
 	handleLogs,
 	handleAssets,
 	handle404,
-} from './helpers/middleware.ts'
+} from './util/middleware.ts'
 
-await validateSystem()
+await initializeSystem()
+await initializeIndex()
 await initializePlugins()
-await updateIndex()
 
 const app = new Application()
 const router = new Router()

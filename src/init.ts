@@ -12,7 +12,7 @@ import {
 
 import { initAll } from '@quasipanacea/plugin-pack-core/_server.ts'
 
-export async function validateSystem() {
+export async function initializeSystem() {
 	async function dircount<T>(
 		source: AsyncIterable<T> | Iterable<T>,
 	): Promise<T[]> {
@@ -115,11 +115,7 @@ export async function validateSystem() {
 	}
 }
 
-export async function initializePlugins() {
-	await initAll()
-}
-
-export async function updateIndex() {
+export async function initializeIndex() {
 	const podMimeOptions: Record<string, string[]> = {}
 	{
 		const podsJson = await utilResource.getPodsJson()
@@ -212,6 +208,10 @@ export async function updateIndex() {
 
 	const indexJsonFile = utilResource.getIndexJsonFile()
 	await Deno.writeTextFile(indexJsonFile, util.jsonStringify(indexJson))
+}
+
+export async function initializePlugins() {
+	await initAll()
 }
 
 export function yieldTrpcRouter<
