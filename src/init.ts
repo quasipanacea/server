@@ -201,10 +201,13 @@ export async function initializeIndex() {
 	}
 
 	const indexJson = await utilResource.getIndexJson()
-	indexJson.podMimeOptions = podMimeOptions
-	indexJson.podviewMimeOptions = podviewMimeOptions
-	indexJson.modelMimeOptions = modelMimeOptions
-	indexJson.modelviewMimeOptions = modelviewMimeOptions
+	if (!indexJson.mimes) {
+		indexJson.mimes = {}
+	}
+	indexJson.mimes.pod = podMimeOptions
+	indexJson.mimes.podview = podviewMimeOptions
+	indexJson.mimes.model = modelMimeOptions
+	indexJson.mimes.modelview = modelviewMimeOptions
 
 	const indexJsonFile = utilResource.getIndexJsonFile()
 	await Deno.writeTextFile(indexJsonFile, util.jsonStringify(indexJson))

@@ -19,8 +19,8 @@ import {
 } from './util/middleware.ts'
 
 await initializeSystem()
-await initializeIndex()
 await initializePlugins()
+await initializeIndex()
 
 const app = new Application()
 const router = new Router()
