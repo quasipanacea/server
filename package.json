@@ -17,6 +17,8 @@
 		"@quasipanacea/plugin-modelview-line": "workspace:^",
 		"@quasipanacea/plugin-modelview-list": "workspace:^",
 		"@quasipanacea/plugin-modelview-markmap": "workspace:^",
+		"@quasipanacea/plugin-overview-basic": "workspace:^",
+		"@quasipanacea/plugin-overview-bullets": "workspace:^",
 		"@quasipanacea/plugin-overview-debug": "workspace:^",
 		"@quasipanacea/plugin-overview-graph": "workspace:^",
 		"@quasipanacea/plugin-overview-mindelixir": "workspace:^",
