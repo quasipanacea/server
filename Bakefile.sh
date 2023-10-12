@@ -2,7 +2,7 @@
 
 # watch: -c -r
 task.dev() {
-	deno run --allow-run --allow-net --allow-env --allow-write --allow-read ./src/server.ts
+	./node_modules/.bin/ts-node --transpileOnly ./server.ts
 }
 
 task.build() {
